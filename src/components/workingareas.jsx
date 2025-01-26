@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Trash2 } from "lucide-react";
+import { Trash2, Star, Pencil } from "lucide-react";
 import "../App.css";
 
 const Workingareas = () => {
@@ -9,7 +9,8 @@ const Workingareas = () => {
     date: "",
     title: "",
     description: "",
-    secdescription: "",
+    time: "",
+    location: "",
   });
   const [selectedImages, setSelectedImages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
@@ -17,8 +18,6 @@ const Workingareas = () => {
   const [selectedWorkingArea, setSelectedWorkingArea] = useState("All");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
-
-
 
   // Fetch data from the GET API on component load
   useEffect(() => {
@@ -39,7 +38,13 @@ const Workingareas = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setSelectedOption(e.target.value);
+
+    // Convert "true" and "false" to booleans for filtering
+    if (name === "selectedWorkingArea") {
+      setSelectedWorkingArea(value === "true" ? true : value === "false" ? false : value);
+    } else {
+      setSelectedOption(value);
+    }
   };
 
   const handleImageChange = (e) => {
@@ -52,14 +57,14 @@ const Workingareas = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { workingArea, date, title, description, secdescription } = formData;
+    const { workingArea, date, title, description, time, location } = formData;
 
     if (selectedImages.length === 0) {
       alert("Please select at least one image before submitting.");
       return;
     }
 
-    if (!workingArea || !date || !title || !description) {
+    if (!workingArea || !date || !title || !description || !time) {
       alert("Please fill in all required fields.");
       return;
     }
@@ -86,8 +91,10 @@ const Workingareas = () => {
           date,
           title,
           description,
-          secdescription: secdescription || null,
           imagename: filenames.join(","),
+          time,
+          location,
+          highlighted: false, // Add highlighted field here
         };
 
         const postResponse = await axios.post(
@@ -109,7 +116,8 @@ const Workingareas = () => {
         date: "",
         title: "",
         description: "",
-        secdescription: "",
+        time: "",
+        location: "",
       });
     } catch (error) {
       console.error("Error uploading images and data:", error.response?.data || error.message);
@@ -145,23 +153,67 @@ const Workingareas = () => {
     }
   };
 
+  const handleHighlight = async (id) => {
+    const currentItem = submittedData.find((data) => data.id === id);
+    const newHighlightStatus = !currentItem.highlighted;
+
+    try {
+      const response = await axios.patch(
+          `http://localhost:5000/api/v1/workingareas/highlight/${id}`,
+          { highlighted: newHighlightStatus },
+          { headers: { "Content-Type": "application/json" } }
+      );
+
+      if (response.status === 200) {
+        setSubmittedData((prev) =>
+            prev.map((item) =>
+                item.id === id ? { ...item, highlighted: newHighlightStatus } : item
+            )
+        );
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error updating highlighted status:", error);
+      alert("Failed to update highlighted status.");
+    }
+  };
+
   const filteredData =
       selectedWorkingArea === "All"
           ? submittedData
-          : submittedData.filter((data) => data.workingarea === selectedWorkingArea);
+          : selectedWorkingArea === true
+              ? submittedData.filter((data) => data.highlighted === true)
+              : selectedWorkingArea === false
+                  ? submittedData.filter((data) => data.highlighted === false)
+                  : submittedData.filter((data) => data.workingarea === selectedWorkingArea);
+
+  const clearForm = () => {
+    setFormData({
+      workingArea: "",
+      date: "",
+      time: "",
+      title: "",
+      location: "",
+      description: "",
+      images: []
+    });
+    setPreviewImages([]);
+  };
 
   return (
       <div
           className="flex flex-col items-center overflow-hidden overflow-y-scroll"
           style={{ height: "calc(100vh - 80px)" }}
       >
-        <h1 className="text-4xl font-bold mt-5 uppercase">
-          Working Areas
-        </h1>
-        <div className="w-full flex flex-col gap-4 p-4">
+        <h1 className="text-4xl font-bold mt-5 uppercase">Working Areas</h1>
+        <div className="w-full flex flex-col gap-4 p-4 ">
           {/* Form Section */}
-          <div className="bg-gray-200 shadow-xl p-6 h-[500px] overflow-hidden overflow-y-scroll scrollbar-custom">
-            <h2 className="text-2xl font-semibold mb-4">Enter Details</h2>
+
+          <div className="border-t-8 border-cyan-500 rounded-lg p-6 h-[500px] overflow-hidden overflow-y-scroll scrollbar-custom">
+            <div className="controls flex justify-between items-center mb-4">
+              <h2 className="text-2xl">Add Activity</h2>
+              <h3 onClick={clearForm} className="underline text-1xl  hover:text-cyan-500">Clear</h3>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-3">
               {/* Row 1: Working Area, Date, Time */}
               <div className="flex flex-wrap gap-3">
@@ -173,11 +225,11 @@ const Workingareas = () => {
                       name="workingArea"
                       value={formData.workingArea}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
                       required
                   >
                     <option value="">Select a Working Area</option>
-                    <option value="Management">Management</option>
+                    <option value="Management" >Management</option>
                     <option value="Business">Business</option>
                     <option value="Community">Community</option>
                     <option value="International Growth and Development">
@@ -195,7 +247,7 @@ const Workingareas = () => {
                       name="date"
                       value={formData.date}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
+                      className="w-full px-3 py-2 rounded-lg border-2 border-gray-300 shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
                       required
                   />
                 </div>
@@ -208,7 +260,7 @@ const Workingareas = () => {
                       name="time"
                       value={formData.time}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
                       required
                   />
                 </div>
@@ -225,8 +277,22 @@ const Workingareas = () => {
                       name="title"
                       value={formData.title}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
                       placeholder="Add Event Title"
+                      required
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Activity Location
+                  </label>
+                  <input
+                      type="text"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
+                      placeholder="Add Event Location"
                       required
                   />
                 </div>
@@ -238,7 +304,7 @@ const Workingareas = () => {
                       name="description"
                       value={formData.description}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
                       placeholder="Add Description about your Event"
                       rows="4"
                       required
@@ -246,7 +312,7 @@ const Workingareas = () => {
                 </div>
               </div>
 
-              {/* Row 3: Upload Images, Highlight Option */}
+              {/* Row 3: Upload Images */}
               <div className="flex flex-wrap gap-3">
                 <div className="flex-1">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -256,7 +322,7 @@ const Workingareas = () => {
                       type="file"
                       multiple
                       onChange={handleImageChange}
-                      className="w-full px-3 py-2 border-2 border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
+                      className="w-full px-3 py-2 border-2 border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
                       required
                   />
                 </div>
@@ -283,13 +349,12 @@ const Workingareas = () => {
                 {isSubmitting ? "Submitting..." : "Submit"}
               </button>
             </form>
-
           </div>
 
           {/* Display Submitted Data Section */}
-          <div className="bg-gray-200 shadow-xl p-6 h-[500px] overflow-hidden overflow-y-scroll scrollbar-custom">
+          <div className="border-t-8 border-cyan-500 rounded-lg p-6 h-[500px] overflow-hidden overflow-y-scroll scrollbar-custom">
             <h2 className="text-2xl font-semibold mb-4">
-              Submitted Data{" "}
+              Activities{" "}
               <span className="text-cl font-normal text-gray-600">
               ({filteredData.length})
             </span>
@@ -302,10 +367,12 @@ const Workingareas = () => {
               </label>
               <select
                   value={selectedWorkingArea}
-                  onChange={(e) => setSelectedWorkingArea(e.target.value)}
+                  onChange={handleChange}
+                  name="selectedWorkingArea"
                   className="w-full px-3 py-2 border border-gray-400 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-cyan-300"
               >
                 <option value="All">All</option>
+                <option value="true">Highlited Activities</option>
                 <option value="Management">Management</option>
                 <option value="Business">Business</option>
                 <option value="Community">Community</option>
@@ -325,21 +392,28 @@ const Workingareas = () => {
                   filteredData.map((data) => (
                       <div
                           key={data.id}
-                          className="border p-4 flex justify-between items-center rounded-lg shadow-md bg-gray-400"
+                          className="p-4 flex justify-between items-center border-cyan-500 border border-t-4 rounded-lg bg-gray-100"
                       >
                         <div>
-                          <p className="text-md font-medium text-white">
+                          <p className="text-md font-medium text-gray-600">
                             <span className="font-bold">Date:</span> {data.date}
                           </p>
-                          <p className="text-3xl font-medium text-white">
+                          <p className="text-3xl font-medium text-gray-700">
                             <span className="font-bold">Title:</span> {data.title}
                           </p>
                         </div>
-
-                        <Trash2
-                            onClick={() => handleDelete(data.id, data.imagename)}
-                            className="cursor-pointer text-white bg-gray-500 rounded-sm p-2 h-10 w-10 hover:bg-white hover:text-red-700"
-                        />
+                        <div className="flex gap-3">
+                          <Star
+                              onClick={() => handleHighlight(data.id)}
+                              className={`cursor-pointer p-2 h-10 w-10 rounded-sm ${
+                                  data.highlighted ? "text-yellow-100 bg-yellow-400" : "bg-gray-300 text-gray-500"
+                              }`}
+                          />
+                          <Trash2
+                              onClick={() => handleDelete(data.id, data.imagename)}
+                              className="cursor-pointer text-gray-500 bg-gray-300 rounded-sm p-2 h-10 w-10 hover:bg-white hover:text-red-700"
+                          />
+                        </div>
                       </div>
                   ))
               )}

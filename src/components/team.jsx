@@ -130,11 +130,11 @@ const Team = () => {
       selectedTeamRole === "All" ? submittedData : submittedData.filter((data) => data.role === selectedTeamRole);
 
   return (
-      <div className="flex flex-col items-center" style={{ height: "calc(100vh - 80px)" }}>
+      <div className="flex flex-col items-center overflow-hidden overflow-y-scroll" style={{ height: "calc(100vh - 80px)" }}>
         <h1 className="text-4xl font-bold mt-5 uppercase">Team</h1>
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+        <div className="w-full flex flex-col gap-4 p-4">
           {/* Form Section */}
-          <div className="bg-gray-100 border-2 shadow-lg rounded-lg p-6 h-[500px] overflow-y-scroll">
+          <div className="border-t-8 border-cyan-500 rounded-lg p-6 h-[500px] overflow-hidden overflow-y-scroll scrollbar-custom">
             <h2 className="text-2xl font-semibold mb-4">Enter Details</h2>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
@@ -144,7 +144,7 @@ const Team = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border-2 border-gray-400 rounded-lg shadow-sm"
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm"
                     required
                 />
               </div>
@@ -156,7 +156,7 @@ const Team = () => {
                     name="post"
                     value={formData.post}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border-2 border-gray-400 rounded-lg shadow-sm"
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm"
                     required
                 />
               </div>
@@ -167,7 +167,7 @@ const Team = () => {
                     name="role"
                     value={formData.role}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border-2 border-gray-400 rounded-lg shadow-sm"
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm"
                     required
                 >
                   <option value="past president">Past president</option>
@@ -181,7 +181,7 @@ const Team = () => {
                 <input
                     type="file"
                     onChange={handleImageChange}
-                    className="w-full px-3 py-2 border-2 border-gray-400 rounded-lg shadow-sm"
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm"
                     required
                 />
               </div>
@@ -208,7 +208,7 @@ const Team = () => {
           </div>
 
           {/* Display Submitted Data Section */}
-          <div className="bg-gray-100 border-2 shadow-lg rounded-lg p-6 h-[500px] overflow-y-scroll">
+          <div className="border-t-8 border-cyan-500 rounded-lg p-6 h-[500px] overflow-hidden overflow-y-scroll scrollbar-custom">
             <h2 className="text-2xl font-semibold mb-4">
               Submitted Data <span className="text-cl font-normal text-gray-600">({filteredData.length})</span>
             </h2>
@@ -235,7 +235,7 @@ const Team = () => {
                   filteredData.map((data) => (
                       <div
                           key={data.id}
-                          className="flex items-center border p-4 rounded-lg shadow-md bg-gray-400"
+                          className="p-4 flex justify-between items-center border-cyan-500 border border-t-4 rounded-lg bg-gray-100"
                       >
                         <img
                             src={`https://media.bizonance.in/api/v1/image/download/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati/${data.imagename.split(",")[0]}`}
@@ -243,10 +243,10 @@ const Team = () => {
                             className="w-16 h-16 object-cover rounded-full mr-4"
                         />
                         <div className="flex-1">
-                          <p className="text-lg font-medium text-white">
+                          <p className="text-lg font-medium text-gray-700">
                             <span className="font-bold">Name:</span> {data.name}
                           </p>
-                          <p className="text-md text-white">
+                          <p className="text-md text-gray-600">
                             <span className="font-bold">Designation:</span> {data.post}
                           </p>
                         </div>

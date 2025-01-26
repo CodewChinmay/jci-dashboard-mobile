@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Dashboard from "./dashboard.jsx";
 import Formregistrations from "./Formregistrations.jsx";
+import Registrations from "./registrations.jsx";
 import Gallery from "./gallery.jsx";
 import Carousel from "./carousel.jsx";
 import Team from "./team.jsx";
@@ -26,7 +27,8 @@ const Menu = () => {
   // Array of main menu items
   const menuItems = [
     { name: "Dashboard", icon: <Home />, component: <Dashboard /> },
-    { name: "Member Registrations", icon: <Users />, component: <Formregistrations /> },
+    { name: "Form Registrations", icon: <Users />, component: <Registrations /> },
+    { name: "Accepted Members", icon: <Users />, component: <Formregistrations /> },
 
   ];
 
@@ -52,7 +54,7 @@ const Menu = () => {
       <div className="flex">
         {/* Menu Sidebar */}
         <div
-            className="menu bg-gray-200 min-w-[300px] shadow-lg flex flex-col items-end space-y-2 p-4"
+            className="menu border-r-4 border-gray-200 min-w-[300px] shadow-lg flex flex-col items-end space-y-2 p-4"
             style={{ height: "calc(100vh - 80px)" }}
         >
           {/* Render main menu items */}
