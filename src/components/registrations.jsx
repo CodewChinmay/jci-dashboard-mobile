@@ -1,26 +1,52 @@
-import { useEffect, useState } from "react";
-import { RefreshCcw, Trash2, MoveLeft, UserPlus, Ban } from "lucide-react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { RefreshCcw, FileX2, FileCheck2, XCircle } from "lucide-react";
 import "./pdf.css";
 
+
+
+
+const Section = ({ title, children }) => (
+    <section className="space-y-4">
+        <h3 className="text-xl font-semibold text-gray-800 flex items-center pb-2 border-b border-gray-200">
+            {title}
+        </h3>
+        {children}
+    </section>
+);
+
+const InfoGrid = ({ cols = "3", children }) => (
+    <div className={`grid grid-cols-3 md:grid-cols-${cols} gap-4`}>
+        {children}
+    </div>
+);
+
+const InfoItem = ({ label, value }) => (
+    <div className="space-y-1">
+        <span className="block text-sm font-medium text-gray-500">{label}</span>
+        <p className="text-gray-800">{value || "N/A"}</p>
+    </div>
+);
+
 const registrations = () => {
-    const [data, setData] = useState([]); // Store all member data
-    const [headers, setHeaders] = useState([]); // Store dynamic headers for table
-    const [selectedRow, setSelectedRow] = useState(null); // Store selected row for detailed view
+    // State variables
+    const [data, setData] = useState([]); // Store fetched data
+    const [headers, setHeaders] = useState([]); // Store dynamic headers
+    const [selectedRow, setSelectedRow] = useState(null); // Store the selected row for modal
+    const [loading, setLoading] = useState(true); // Track loading state
+    const [showRejectPopup, setShowRejectPopup] = useState(false); // Show/hide reject popup
+    const [rejectReason, setRejectReason] = useState(""); // Store reject reason
+    const [showAcceptPopup, setShowAcceptPopup] = useState(false); // Show/hide accept popup
 
     // Fetch data from the API
-    const getData = async (type = "all") => {
+    const getData = async () => {
         try {
-            let url = "http://localhost:5000/api/v1/membership/getforms";
-            if (type === "old") {
-                url = "http://localhost:5000/api/v1/membership/getforms?old=true";
-            }
-            const response = await fetch(url);
+            setLoading(true); // Set loading to true before fetching
+            const response = await fetch("http://localhost:5000/api/v1/membership/getforms");
             const fetchedData = await response.json();
             setData(fetchedData);
 
+            // Extract headers from the first object
             if (fetchedData && fetchedData.length > 0) {
-                // Dynamically extract headers from the first data item
                 const extractHeaders = (item) => {
                     const getAllKeys = (obj, prefix = "") =>
                         Object.keys(obj).reduce((acc, key) => {
@@ -48,273 +74,272 @@ const registrations = () => {
             }
         } catch (error) {
             console.error(`Error fetching data: ${error}`);
+        } finally {
+            setLoading(false); // Set loading to false after fetching is done
         }
     };
 
-    // Handle Highlight (Accept Member)
-    const handleHighlight = async (Formid, currentStatus) => {
-        const newStatus = !currentStatus; // Toggle between true/false
-
-        try {
-            // Make the API request to update the highlight status using Formid
-            const response = await axios.patch(
-                `http://localhost:5000/api/v1/membership/highlight/${Formid}`,
-                { highlighted: newStatus } // Correct structure for the request body
-            );
-
-            if (response.status === 200) {
-                // Update the state immediately after the change is made
-                setData((prevData) =>
-                    prevData.map((member) =>
-                        member.Formid === Formid ? { ...member, highlighted: newStatus } : member
-                    )
-                );
-
-                alert(`Member ${newStatus ? "highlighted" : "unhighlighted"} successfully!`);
-            } else {
-                alert("Failed to update highlighted status.");
-            }
-        } catch (error) {
-            console.error("Error updating highlight status:", error);
-            alert("An error occurred while updating the highlighted status.");
-        }
-    };
-
-    // Delete a member by ID
-    const deleteMember = async (formid) => {
-        // Ask for confirmation before proceeding with the deletion
-        const confirmDelete = window.confirm("Are you sure you want to delete this member?");
-
-        if (!confirmDelete) {
-            return; // If the user clicks "No", don't delete the member
-        }
-
-        try {
-            console.log("Deleting member with Formid:", formid);
-
-            // Send the DELETE request to the backend
-            const response = await fetch(
-                `http://localhost:5000/api/v1/membership/delete/${formid}`,
-                {
-                    method: "DELETE",
-                }
-            );
-
-            if (response.ok) {
-                alert("Member successfully deleted!");
-                // Remove the deleted member from the local state to immediately reflect changes
-                setData((prevData) => prevData.filter((item) => item.Formid !== formid));
-                closeModal(); // Close modal after deletion
-            } else {
-                const error = await response.json();
-                console.error("Error deleting member:", error.message);
-                alert(`Failed to delete the member: ${error.message}`);
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            alert("An error occurred while deleting the member.");
-        }
-    };
-
+    // Fetch data on component mount
     useEffect(() => {
-        getData(); // Fetch data on initial load
+        getData();
     }, []);
 
-    // Helper function to get nested values for table cells
+
+    // Helper function to get nested values
     const getNestedValue = (obj, path) =>
         path
             .split(".")
             .reduce((acc, part) => (acc && acc[part] !== undefined ? acc[part] : "N/A"), obj);
 
-    // Open the detailed view modal for a specific row
+    // Open modal with the selected row data
     const openModal = (row) => {
         setSelectedRow(row);
     };
 
-    // Close the modal
+    // Close modal
     const closeModal = () => {
         setSelectedRow(null);
     };
 
-    // Table View
+    // Show reject popup
+    const showRejectForm = () => {
+        setShowRejectPopup(true);
+    };
+
+    // Close reject popup
+    const closeRejectPopup = () => {
+        setShowRejectPopup(false);
+        setRejectReason(""); // Reset reason input
+    };
+
+    // Show accept popup
+    const showAcceptForm = () => {
+        setShowAcceptPopup(true);
+    };
+
+    // Close accept popup
+    const closeAcceptPopup = () => {
+        setShowAcceptPopup(false);
+    };
+
+    // Reject form with reason
+    const rejectForm = async (formId, reason) => {
+        try {
+            const response = await fetch(
+                `http://localhost:5000/api/v1/membership/reject/${formId}`,
+                {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ rejectreason: reason }),
+                }
+            );
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message);
+                getData();  // Refresh the data
+                closeRejectPopup();  // Close the popup
+            } else {
+                alert(data.error || "Failed to reject form");
+            }
+        } catch (error) {
+            console.error("Rejection error:", error);
+            alert("Failed to reject form. Please try again.");
+        }
+    };
+
+    // Accept form confirmation and update
+    const acceptForm = async (Formid) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/v1/membership/accept/${Formid}`, {
+                method: "PATCH",
+            });
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message); // Show success message
+                getData(); // Refresh data
+                closeAcceptPopup(); // Close the popup after acceptance
+            } else {
+                alert(data.error); // Show error message if any
+            }
+        } catch (error) {
+            console.error("Error accepting form:", error);
+            alert("Failed to accept the form. Please try again later.");
+        }
+    };
+
+    // If no data is available and it's not loading
     if (!data || data.length === 0) {
-        return <div className="text-center text-gray-500">No data available</div>;
-    }
-
-    if (selectedRow) {
         return (
-            <div
-                className="p-6 bg-gray-100 overflow-hidden overflow-y-scroll"
-                style={{
-                    height: "calc(100vh - 80px)", // Dynamically calculate height
-                }}
-            >
-                <div className="buttons flex space-x-4 mb-4">
-                    <button
-                        className="px-6 py-2 bg-blue-500 text-white rounded-md flex items-center"
-                        onClick={closeModal}
-                    >
-                        <MoveLeft className="mr-2" />
-                        Close
-                    </button>
-                    <button
-                        className="px-6 py-2 bg-red-500 text-white rounded-md flex items-center"
-                        onClick={() => {
-                            console.log(selectedRow.Formid);
-                            deleteMember(selectedRow.Formid); // Ensure Id is correctly passed
-                        }}
-                    >
-                        <Trash2 className="mr-2" />
-                        Delete
-                    </button>
-
-                    <button
-                        className={`px-6 py-2 rounded-md flex items-center ${
-                            selectedRow.highlighted ? "bg-green-600" : "bg-gray-400"
-                        } text-white`}
-                        onClick={() => {
-                            console.log(selectedRow.Formid);
-                            handleHighlight(selectedRow.Formid, selectedRow.highlighted);
-                        }} // Accept Member / Highlight
-                    >
-                        <UserPlus className="mr-2" />
-                        {selectedRow.highlighted ? "Member Accepted" : "Accept Member"}
-                    </button>
-                </div>
-
-                <div id="pdf-content" className="bg-white mx-auto p-6 border-4 border-cyan-600">
-                    {/* Personal Information Section */}
-                    <section className="mb-6">
-                        <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b-2 border-cyan-700 pb-2">
-                            Personal Information
-                        </h3>
-                        <div className="grid grid-cols-3 gap-6">
-                            <div>
-                                <strong>Name:</strong> <span>{selectedRow.Name || "N/A"}</span>
-                            </div>
-                            <div>
-                                <strong>D.O.B:</strong> <span>{selectedRow.Dob || "N/A"}</span>
-                            </div>
-                            <div>
-                                <strong>Mobile Number:</strong>{" "}
-                                <span>{selectedRow.Mobileno || "N/A"}</span>
-                            </div>
-                            <div>
-                                <strong>Blood Group:</strong> <span>{selectedRow.Bloodgroup || "N/A"}</span>
-                            </div>
-                            <div>
-                                <strong>Education:</strong> <span>{selectedRow.Education || "N/A"}</span>
-                            </div>
-                            <div>
-                                <strong>Postal Address:</strong> <span>{selectedRow.Postaladdress || "N/A"}</span>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Family Details Section */}
-                    <section className="mb-6">
-                        <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b-2 border-cyan-700 pb-2">
-                            Family Details
-                        </h3>
-                        <div className="grid grid-cols-3 gap-6">
-                            <div>
-                                <strong>Married Status:</strong> <span>{selectedRow.Mstatus || "N/A"}</span>
-                            </div>
-                            <div>
-                                <strong>Wife's Name:</strong> <span>{selectedRow.Wifename || "N/A"}</span>
-                            </div>
-                            <div>
-                                <strong>Wife's D.O.B:</strong> <span>{selectedRow.Wdob || "N/A"}</span>
-                            </div>
-                            <div>
-                                <strong>Wife's Mobile Number:</strong>{" "}
-                                <span>{selectedRow.Wmobileno || "N/A"}</span>
-                            </div>
-                            <div>
-                                <strong>Child's Name:</strong> <span>{selectedRow.Childname || "N/A"}</span>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Professional Information Section */}
-                    <section className="mb-6">
-                        <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b-2 border-cyan-700 pb-2">
-                            Professional Information
-                        </h3>
-                        <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <strong>Occupation:</strong>{" "}
-                                <span>{selectedRow.Occupation || "N/A"}</span>
-                            </div>
-                            <div>
-                                <strong>Occupation Details:</strong>{" "}
-                                <span>{selectedRow.Occupationdetail || "N/A"}</span>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Additional Information Section */}
-                    <section className="mb-6">
-                        <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b-2 border-cyan-700 pb-2">
-                            Additional Information
-                        </h3>
-                        <div className="grid grid-cols-3 gap-6">
-                            <div>
-                                <strong>Address:</strong> <span>{selectedRow.Address || "N/A"}</span>
-                            </div>
-                            <div>
-                                <strong>Expectations:</strong>{" "}
-                                <span>{selectedRow.Expectation || "N/A"}</span>
-                            </div>
-                            <div>
-                                <strong>JC Name:</strong> <span>{selectedRow.Jcname || "N/A"}</span>
-                            </div>
-                        </div>
-                    </section>
-                </div>
+            <div className="text-center text-gray-500">
+                {loading ? "Loading..." : "No data available"}
             </div>
         );
     }
 
+    // If a row is selected, show its details in a modal
+    if (selectedRow) {
+        return (
+            <div
+                className="p-6 bg-gray-100 overflow-hidden overflow-y-scroll"
+                style={{ height: "calc(100vh - 80px)" }}
+            >
+                <div className="buttons flex space-x-4 mb-4">
+                    {/* Back button */}
+                    <button
+                        className="px-6 py-2 bg-blue-500 text-white rounded-md flex items-center"
+                        onClick={closeModal}
+                    >
+                        Back
+                    </button>
+                    {/* Reject button */}
+                    <button
+                        className="px-6 py-2 bg-red-500 text-white rounded-md flex items-center"
+                        onClick={showRejectForm}
+                    >
+                        <FileX2 className="mr-2" />
+                        Reject
+                    </button>
+                    {/* Accept button */}
+                    <button
+                        className="px-6 py-2 bg-green-500 text-white rounded-md flex items-center"
+                        onClick={showAcceptForm}
+                    >
+                        <FileCheck2 className="mr-2" />
+                        Accept
+                    </button>
+                </div>
+
+                {/* PDF Content */}
+                <div className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden p-8">
+                    {/* Personal Information Section */}
+                    <Section title="Personal Information" className="relative">
+                        <InfoGrid cols="3">
+                            <InfoItem label="Name" value={selectedRow.Name || "N/A"} />
+                            <InfoItem label="D.O.B" value={selectedRow.Dob || "N/A"} />
+                            <InfoItem label="Mobile Number" value={selectedRow.Mobileno || "N/A"} />
+                            <InfoItem label="Blood Group" value={selectedRow.Bloodgroup || "N/A"} />
+                            <InfoItem label="Education" value={selectedRow.Education || "N/A"} />
+                            <InfoItem label="Postal Address" value={selectedRow.Postaladdress || "N/A"} />
+                            <InfoItem label="Married Status" value={selectedRow.Mstatus || "N/A"} />
+                            <InfoItem label="Wife's Name" value={selectedRow.Wifename || "N/A"} />
+                            <InfoItem label="Wife's D.O.B" value={selectedRow.Wdob || "N/A"} />
+                            <InfoItem label="Wife's Mobile Number" value={selectedRow.Wmobileno || "N/A"} />
+                            <InfoItem label="Child's Name" value={selectedRow.Childname || "N/A"} />
+                            <InfoItem label="Occupation" value={selectedRow.Occupation || "N/A"} />
+                            <InfoItem label="Occupation Details" value={selectedRow.Occupationdetail || "N/A"} />
+                            <InfoItem label="Address" value={selectedRow.Address || "N/A"} />
+                            <InfoItem label="Expectations" value={selectedRow.Expectation || "N/A"} />
+                            <InfoItem label="JC Name" value={selectedRow.Jcname || "N/A"} />
+
+                        </InfoGrid>
+                    </Section>
+                </div>
+
+                {/* Reject Popup */}
+                {showRejectPopup && (
+                    <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
+                        <div className="bg-white p-6 rounded-md shadow-lg w-1/3">
+                            <h3 className="text-lg font-semibold mb-4">Reject Form?</h3>
+                            <textarea
+                                className="w-full p-2 border mb-4 rounded"
+                                placeholder="Reason for rejection"
+                                value={rejectReason}
+                                onChange={(e) => setRejectReason(e.target.value)}
+                                required
+                            />
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    className="px-4 py-2 bg-gray-300 rounded"
+                                    onClick={closeRejectPopup}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="px-4 py-2 bg-red-500 text-white rounded"
+                                    onClick={() => rejectForm(selectedRow.Formid, rejectReason)} // Changed Formid to _id
+                                >
+                                    Reject
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Accept Popup */}
+                {showAcceptPopup && (
+                    <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
+                        <div className="bg-white p-6 rounded-md shadow-lg w-1/3">
+                            <h3 className="text-lg font-semibold mb-4">Are you sure you want to accept this form?</h3>
+                            <div className="flex space-x-4">
+                                <button
+                                    className="px-4 py-2 bg-gray-300 rounded-md"
+                                    onClick={closeAcceptPopup}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="px-4 py-2 bg-green-500 text-white rounded-md"
+                                    onClick={() => acceptForm(selectedRow.Formid)}
+                                >
+                                    Accept
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // Default table view
     return (
-        <div className="p-4 overflow-hidden overflow-x-scroll scrollbar-custom" style={{ width: "calc(100vw - 300px)" }}>
-            <div className="flex items-center mb-5" >
-                <h1 className="text-xl font-semibold">Form Registrations</h1>
+        <div className=" h-screen p-6 overflow-hidden " style={{ width: "calc(100vw - 300px)" , height: "calc(100vh - 80px)" }}>
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-semibold">Registration Requests</h1>
                 <button
-                    className="ml-4 px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-                    onClick={() => getData()}
+                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    onClick={getData}
                 >
-                    <RefreshCcw />
+                    <RefreshCcw className="w-5 h-5" />
                 </button>
             </div>
-            <table className="" >
-                <thead>
-                <tr className="bg-gray-100">
-                    <th className="py-2 px-4 whitespace-nowrap">SR No.</th>
-                    {headers.map((header) => (
-                        <th key={header} className="py-2 px-4">
-                            {header.replace(/_/g, " ")}
-                        </th>
-                    ))}
-                </tr>
-                </thead>
-                <tbody>
-                {data.map((item, index) => (
-                    <tr
-                        key={index}
-                        className={`hover:bg-gray-200 cursor-pointer ${item.highlighted ? "bg-green-300" : ""}`} // Green if highlighted
-                        onClick={() => openModal(item)}
-                    >
-                        <td className="py-2 px-4">{index + 1}</td>
-                        {headers.map((header) => (
-                            <td key={header} className="py-2 px-4 whitespace-nowrap">
-                                {getNestedValue(item, header)}
-                            </td>
+
+            <div className="bg-white rounded-lg shadow border border-gray-200 scrollbar-custom overflow-x-auto">
+                {loading ? (
+                    <div className="text-center py-10 text-gray-500">Loading...</div>
+                ) : (
+                    <table className="w-full border-none min-w-[1000px]">
+                        <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">#</th>
+                            {headers.map(header => (
+                                <th key={header} className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                                    {header.replace(/_/g, " ")}
+                                </th>
+                            ))}
+                        </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                        {data.map((item, index) => (
+                            <tr
+                                key={index}
+                                className={`hover:bg-gray-50 cursor-pointer ${item.highlighted ? "bg-green-50" : ""}`}
+                                onClick={() => openModal(item)}
+                            >
+                                <td className="px-4 py-3 text-gray-600">{index + 1}</td>
+                                {headers.map(header => (
+                                    <td key={header} className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                                        {getNestedValue(item, header)}
+                                    </td>
+                                ))}
+                            </tr>
                         ))}
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+                )}
+            </div>
         </div>
     );
 };

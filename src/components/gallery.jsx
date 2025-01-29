@@ -3,8 +3,8 @@ import axios from "axios";
 import { PlusCircle, Eye, Trash2, X, RefreshCw } from "lucide-react";
 
 const Gallery = () => {
-  const [selectedImages, setSelectedImages] = useState([]); // Changed to hold an array of images
-  const [previewImages, setPreviewImages] = useState([]); // Changed to hold an array of previews
+  const [selectedImages, setSelectedImages] = useState([]); // Store selected image files
+  const [previewImages, setPreviewImages] = useState([]); // Store preview URLs
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [images, setImages] = useState([]);
   const [lightboxImage, setLightboxImage] = useState(null);
@@ -17,8 +17,8 @@ const Gallery = () => {
           "https://media.bizonance.in/api/v1/image/download/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati";
       const mappedImages = response.data.imageNames.map((name) => ({
         url: `${baseUrl}/${name}?q=50%&&f=webp`,
-        id: name, // Assuming this is the image's identifier
-        name: name // Add the image name to the mapped data
+        id: name,
+        name: name,
       }));
 
       setImages(mappedImages);
@@ -30,51 +30,32 @@ const Gallery = () => {
   // Handle image deletion
   const deleteImage = async (imageName) => {
     try {
-      // Fetch image details from your server if necessary
       const response = await fetch(`http://localhost:5000/api/v1/gallery/delete/${imageName}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        console.log(data.message); // Image deleted from database
         alert(data.message);
-
-        // Now, delete the image from the external server
-        const filenames = [imageName]; // Assume you have the image name, adjust if necessary
-
-        for (const file of filenames) {
-          const link = `https://media.bizonance.in/api/v1/image/download/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati/${file}/?delete=both`;
-          const externalResponse = await axios.get(link);
-
-          if (externalResponse.status !== 200) {
-            console.error(`Failed to delete image from external server: ${file}`);
-            throw new Error(`Image deletion failed for ${file}`);
-          } else {
-            console.log(`Image deleted from external server: ${file}`);
-          }
-        }
-
-        fetchImages();  // Optionally fetch images again to refresh the UI
+        fetchImages();
       } else {
-        console.error(data.error); // Error deleting image from database
+        console.error(data.error);
       }
     } catch (error) {
-      console.error('Error deleting image:', error);
+      console.error("Error deleting image:", error);
     }
   };
 
-
-  // Handle multiple image selection
+  // Handle image selection
   const handleImageChange = (e) => {
     const files = e.target.files;
-    const imagesArray = Array.from(files); // Convert the FileList to an array
+    const imagesArray = Array.from(files);
     setSelectedImages(imagesArray);
-    setPreviewImages(imagesArray.map(file => URL.createObjectURL(file)));
+    setPreviewImages(imagesArray.map((file) => URL.createObjectURL(file)));
   };
 
   // Handle form submission
@@ -87,7 +68,7 @@ const Gallery = () => {
     }
 
     const formData = new FormData();
-    selectedImages.forEach(image => formData.append("file", image));
+    selectedImages.forEach((image) => formData.append("file", image));
 
     setIsSubmitting(true);
 
@@ -148,53 +129,52 @@ const Gallery = () => {
         <h1 className="text-3xl font-bold text-gray-700 mb-6 text-center">Gallery Upload and Preview</h1>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="flex gap-8 items-start justify-center">
-            <div className="flex-1 place-items-center">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4 text-center">Upload Section</h2>
-              <label
-                  htmlFor="imageUpload"
-                  className="w-[300px] h-[150px] flex items-center justify-center bg-gray-100 border-2 border-dashed border-blue-400 cursor-pointer hover:bg-gray-50 transition"
-              >
-                <PlusCircle className="w-12 h-12 text-blue-400" />
-              </label>
-              <input
-                  type="file"
-                  id="imageUpload"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  multiple // Allow multiple image selection
-                  className="hidden"
-              />
-              <p className="text-sm text-gray-500 mt-3 text-center">
-                {selectedImages.length > 0 ? `${selectedImages.length} image(s) selected` : "Click the icon to choose images"}
-              </p>
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-semibold text-gray-700 text-center mb-4">Preview Section</h2>
+          <div className="flex flex-col items-center">
+            <label
+                htmlFor="imageUpload"
+                className="w-[400px] h-[240px] flex items-center justify-center bg-gray-100 border-2 border-dashed border-blue-400 cursor-pointer hover:bg-gray-50 transition relative"
+            >
               {previewImages.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-4">
-                    {previewImages.map((image, index) => (
-                        <div key={index} className="aspect-w-16 aspect-h-9 bg-gray-100 rounded-lg shadow-md overflow-hidden">
-                          <img src={image} alt={`Selected Preview ${index + 1}`} className="w-full h-full object-cover" />
-                        </div>
-                    ))}
-                  </div>
+                  <img
+                      src={previewImages[previewImages.length - 1]} // Display the last selected image
+                      alt="Selected Preview"
+                      className="w-full h-full object-cover rounded-lg"
+                  />
               ) : (
-                  <p className="text-gray-500 text-center">No images selected for preview</p>
+                  <PlusCircle className="w-12 h-12 text-blue-400" />
               )}
-            </div>
+            </label>
+            <input
+                type="file"
+                id="imageUpload"
+                accept="image/*"
+                onChange={handleImageChange}
+                multiple
+                className="hidden"
+            />
+            <p className="text-sm text-gray-500 mt-3 text-center">
+              {selectedImages.length > 0 ? `${selectedImages.length} image(s) selected` : "Click the icon to choose images"}
+            </p>
+            <h3 onClick={() => {
+              setSelectedImages([]);
+              setPreviewImages([]);
+            }} className="underline text-1xl  hover:text-cyan-500">Clear</h3>
           </div>
+
           <div className="flex justify-end space-x-5">
             <button
                 type="button"
-                className={`px-3 py-1 rounded-full text-white font-semibold transition bg-cyan-500 hover:bg-cyan-600`} onClick={fetchImages}
+                className={`px-3 py-1 rounded-full text-white font-semibold transition bg-cyan-500 hover:bg-cyan-600`}
+                onClick={fetchImages}
             >
-              <RefreshCw/>
+              <RefreshCw />
             </button>
             <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`px-10 py-3 rounded-lg text-white font-semibold transition ${isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 shadow-md"}`}
+                className={`px-10 py-3 rounded-lg text-white font-semibold transition ${
+                    isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 shadow-md"
+                }`}
             >
               {isSubmitting ? "Uploading..." : "Submit"}
             </button>
@@ -205,8 +185,15 @@ const Gallery = () => {
           <div className="grid grid-cols-3 gap-6">
             {images.length > 0 ? (
                 images.map((image, index) => (
-                    <div key={image.id || index} className="relative w-full h-60 bg-gray-100 rounded-lg overflow-hidden shadow-md">
-                      <img src={image.url} alt={`Uploaded Image ${index + 1}`} className="w-full h-full object-cover" />
+                    <div
+                        key={image.id || index}
+                        className="relative w-full h-60 bg-gray-100 rounded-lg overflow-hidden shadow-md"
+                    >
+                      <img
+                          src={image.url}
+                          alt={`Uploaded Image ${index + 1}`}
+                          className="w-full h-full object-cover"
+                      />
                       <div className="absolute top-2 right-2 flex gap-2">
                         <button
                             className="bg-white p-2 rounded-full shadow hover:bg-gray-100"
@@ -216,7 +203,7 @@ const Gallery = () => {
                         </button>
                         <button
                             className="bg-white p-2 rounded-full shadow hover:bg-gray-100"
-                            onClick={() => deleteImage(image.name)} // Use image.name to call the delete function
+                            onClick={() => deleteImage(image.name)}
                         >
                           <Trash2 className="w-5 h-5 text-red-500" />
                         </button>

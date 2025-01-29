@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import logo from '../assets/jciamravati.png';
+import bizologo from '../assets/bizonancelogo.png'
 
 const Login = () => {
   const [userId, setUserId] = useState('');
@@ -19,7 +20,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
+    <div className="flex justify-center flex-col items-center h-screen bg-gray-100">
       <div className="w-full max-w-sm bg-white rounded-lg shadow-md p-6 flex flex-col items-center">
         <img src={logo} alt="" className='w-[160px] mb-3' />
         <h2 className="text-2xl font-semibold text-gray-800 text-center">Login</h2>
@@ -58,6 +59,12 @@ const Login = () => {
             Login
           </button>
         </form>
+
+      </div>
+
+      <div className="div mt-4 place-items-center">
+        <p>Designed and Managed by</p>
+        <img src={bizologo} className="w-12" alt=""/>
       </div>
     </div>
   );
