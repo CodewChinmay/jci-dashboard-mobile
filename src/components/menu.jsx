@@ -11,23 +11,26 @@ import {
   Pencil,
   UserRoundX
 } from "lucide-react";
-import Dashboard from "./dashboard.jsx";
-import Formregistrations from "./Formregistrations.jsx";
+import Sidebar from "./dashboard.jsx";
+import Formregistrations from "./formregistrations.jsx";
 import Registrations from "./registrations.jsx";
 import RejectedForms from './Rejectedmembers.jsx';
 import Gallery from "./gallery.jsx";
 import Carousel from "./carousel.jsx";
 import Team from "./team.jsx";
-import Workingareas from "./Workingareas.jsx";
+import Workingareas from "./workingareas.jsx";
 import Header from "./Header.jsx";
 import bizologo from "@/assets/bizonancelogo.png";
+
+import Workingtab from "./workingtab.jsx";
+import Teamtab from "./teamtab.jsx";
 
 const Menu = () => {
   const [activeComponent, setActiveComponent] = useState("Dashboard");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const menuItems = [
-    { name: "Dashboard", icon: <Home size={20} />, component: <Dashboard /> },
+    { name: "Dashboard", icon: <Home size={20} />, component: <Sidebar /> },
     { name: "Registration Requests", icon: <Users size={20} />, component: <Registrations /> },
     { name: "General Members", icon: <UserRoundCheck size={20} />, component: <Formregistrations /> },
     { name: "Rejected Members", icon: <UserRoundX size={20} />, component: <RejectedForms /> }
@@ -35,10 +38,10 @@ const Menu = () => {
 
   const dropdownItems = [
     // { name: "Header", icon: <Pencil size={18} />, component: <Header /> },
-    { name: "Team", icon: <Briefcase size={18} />, component: <Team /> },
+    { name: "Team", icon: <Briefcase size={18} />, component: <Teamtab /> },
     { name: "Gallery", icon: <ImagePlus size={18} />, component: <Gallery /> },
     { name: "Carousel", icon: <ImagePlus size={18} />, component: <Carousel /> },
-    { name: "Working Areas", icon: <PencilRuler size={18} />, component: <Workingareas /> }
+    { name: "Working Areas", icon: <PencilRuler size={18} />, component: <Workingtab /> }
   ];
 
   const getActiveComponent = (name) => {
@@ -49,20 +52,24 @@ const Menu = () => {
   };
 
   return (
-      <div className="flex bg-gray-50" style={{ height: "calc(100vh - 80px)" }}>
+      <div className="flex bg-gray-200" style={{ height: "calc(100vh - 80px)" }}>
         {/* Menu Sidebar */}
-        <div className="menu bg-white min-w-[280px] shadow-xl flex flex-col p-4 border-r border-gray-100">
+
+        <div className="menu   min-w-[280px] shadow-xl shadow-gray-1000 flex flex-col pt-4 pr-5  border-gray-200">
           <div className="flex-1 overflow-y-auto">
             <div className="space-y-1">
               {/* Main Menu Items */}
               {menuItems.map((item, index) => (
                   <button
                       key={index}
-                      onClick={() => setActiveComponent(item.name)}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+                      onClick={() => {
+                        setActiveComponent(item.name);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-r-full transition-all duration-200
                   ${activeComponent === item.name
-                          ? "bg-cyan-500 text-white shadow-md"
-                          : "text-gray-600 hover:bg-blue-50 hover:text-cyan-600"}`}
+                          ? "bg-cyan-600 text-white shadow-md rounded-r-full"
+                          : "text-gray-600 hover:bg-gray-200 hover:text-gray-800"}`}
                   >
                     {item.icon}
                     <span className="text-sm font-medium">{item.name}</span>
@@ -73,8 +80,8 @@ const Menu = () => {
               <div className="mt-6">
                 <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
-                  ${isDropdownOpen ? "bg-blue-50 text-cyan-600" : "text-gray-600 hover:bg-blue-50"}`}
+                    className={`w-full flex items-center justify-between px-4 py-3  transition-all duration-200
+                  ${isDropdownOpen ? "" : "text-gray-600 hover:bg-gray-200"}`}
                 >
                   <div className="flex items-center space-x-3">
                     <PencilRuler size={20} />
@@ -85,18 +92,18 @@ const Menu = () => {
 
                 {/* Dropdown Items */}
                 {isDropdownOpen && (
-                    <div className="ml-8 space-y-2 pl-2 border-l-4 rounded-lg border-cyan-400">
+                    <div className=" space-y-2 rounded-lg ">
                       {dropdownItems.map((item, index) => (
                           <button
                               key={index}
                               onClick={() => {
                                 setActiveComponent(item.name);
-                                setIsDropdownOpen(false);
+                                setIsDropdownOpen(true);
                               }}
-                              className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-all duration-200
+                              className={`w-full flex items-center space-x-3 px-4 py-2.5 transition-all duration-200
                         ${activeComponent === item.name
-                                  ? "bg-cyan-500 text-white shadow-md"
-                                  : "text-gray-600 hover:bg-cyan-50 hover:text-cyan-600"}`}
+                                  ? "bg-cyan-600 text-white shadow-md rounded-r-full"
+                                  : "text-gray-600 hover:bg-gray-200 hover:text-gray-600"}`}
                           >
                             {item.icon}
                             <span className="text-sm">{item.name}</span>
@@ -110,14 +117,14 @@ const Menu = () => {
 
           </div>
 
-          <div className="div flex">
-            <p>Designed and Managed by</p>
-            <img src={bizologo} className="w-12" alt=""/>
-          </div>
+          {/*<div className="div flex">*/}
+          {/*  <p>Designed and Managed by</p>*/}
+          {/*  <img src={bizologo} className="w-12" alt=""/>*/}
+          {/*</div>*/}
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="flex-1 p-0 bg-gradient-to-r from-gray-200 via-gray-100/90 to-white">
           <div className="">
             {getActiveComponent(activeComponent)}
           </div>

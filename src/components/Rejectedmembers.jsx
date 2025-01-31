@@ -86,7 +86,7 @@ const Rejectedmembers = () => {
     if (!data.length) return <div className="text-center text-gray-500 p-4">No rejected members found</div>;
 
     if (selectedRow) return (
-        <div className="p-6 bg-gray-50 min-h-screen" style={{ height: "calc(100vh - 80px)" }}>
+        <div className="p-6" style={{ height: "calc(100vh - 80px)" }}>
             <div className="flex flex-wrap gap-4 mb-6">
                 <button className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center shadow-md transition-all" onClick={closeModal}>
                     <MoveLeft className="w-4 h-4 mr-2" /> Back
@@ -140,9 +140,9 @@ const Rejectedmembers = () => {
     );
 
     return (
-        <div className="h-screen p-6 overflow-hidden" style={{ width: "calc(100vw - 300px)", height: "calc(100vh - 80px)" }}>
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold">Rejected Members</h1>
+        <div className="p-6 overflow-hidden" style={{ width: "calc(100vw - 300px)", height: "calc(100vh - 80px)" }}>
+            <div className="flex items-center justify-between">
+                <h1 className="bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold ">Rejected Members</h1>
                 <button
                     className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                     onClick={getData}
@@ -151,7 +151,7 @@ const Rejectedmembers = () => {
                 </button>
             </div>
 
-            <div className="bg-white rounded-lg shadow border border-gray-200 scrollbar-custom overflow-x-auto">
+            <div className="bg-white shadow rounded-r-xl rounded-b-xl scrollbar-custom overflow-hidden overflow-x-scroll">
                 <table className="w-full border-none min-w-[1000px]">
                     <thead className="bg-gray-50">
                     <tr>

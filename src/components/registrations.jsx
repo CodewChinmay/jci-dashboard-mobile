@@ -296,8 +296,8 @@ const registrations = () => {
     // Default table view
     return (
         <div className=" h-screen p-6 overflow-hidden " style={{ width: "calc(100vw - 300px)" , height: "calc(100vh - 80px)" }}>
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold">Registration Requests</h1>
+            <div className="flex items-center justify-between ">
+                <h1 className="bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold">Registration Requests</h1>
                 <button
                     className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                     onClick={getData}
@@ -306,7 +306,7 @@ const registrations = () => {
                 </button>
             </div>
 
-            <div className="bg-white rounded-lg shadow border border-gray-200 scrollbar-custom overflow-x-auto">
+            <div className="bg-white shadow rounded-r-xl rounded-b-xl scrollbar-custom overflow-x-auto">
                 {loading ? (
                     <div className="text-center py-10 text-gray-500">Loading...</div>
                 ) : (

@@ -13,19 +13,29 @@ const Gallery = () => {
   const fetchImages = async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/v1/gallery/images");
-      const baseUrl =
-          "https://media.bizonance.in/api/v1/image/download/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati";
+  
+      console.log("Gallery API Response:", response.data); // Debugging
+  
+      if (!response.data || !Array.isArray(response.data.imageNames)) {
+        console.error("Invalid response format:", response.data);
+        setImages([]); // Ensure images array is reset
+        return;
+      }
+  
+      const baseUrl = "https://media.bizonance.in/api/v1/image/download/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati";
       const mappedImages = response.data.imageNames.map((name) => ({
         url: `${baseUrl}/${name}?q=50%&&f=webp`,
         id: name,
         name: name,
       }));
-
+  
       setImages(mappedImages);
     } catch (error) {
       console.error("Error fetching gallery images:", error.message);
+      setImages([]); // Ensure state updates even on failure
     }
   };
+  
 
   // Handle image deletion
   const deleteImage = async (imageName) => {
@@ -36,12 +46,12 @@ const Gallery = () => {
           "Content-Type": "application/json",
         },
       });
-
+  
       const data = await response.json();
-
+      
       if (response.ok) {
         alert(data.message);
-        fetchImages();
+        fetchImages(); // Fetch updated images after successful deletion
       } else {
         console.error(data.error);
       }
@@ -49,6 +59,9 @@ const Gallery = () => {
       console.error("Error deleting image:", error);
     }
   };
+  
+  
+  
 
   // Handle image selection
   const handleImageChange = (e) => {
@@ -204,9 +217,17 @@ const Gallery = () => {
                         <button
                             className="bg-white p-2 rounded-full shadow hover:bg-gray-100"
                             onClick={() => deleteImage(image.name)}
+
                         >
                           <Trash2 className="w-5 h-5 text-red-500" />
                         </button>
+                        {/* <button
+                            className="bg-white p-2 rounded-full shadow hover:bg-gray-100"
+                            onClick={() => deleteImage(image.name)}
+
+                        >
+                          <Trash2 className="w-5 h-5 text-red-500" />
+                        </button> */}
                       </div>
                     </div>
                 ))

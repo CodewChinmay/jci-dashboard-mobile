@@ -221,8 +221,8 @@ const Formregistrations = () => {
 
   return (
       <div className=" p-6 overflow-hidden scrollbar-custom overflow-y-scroll" style={{ width: "calc(100vw - 300px)" , height: "calc(100vh - 80px)" }}>
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">General Members</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold ">General Members</h1>
           <button
               className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
               onClick={getData}
@@ -231,7 +231,7 @@ const Formregistrations = () => {
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow border border-gray-200 scrollbar-custom overflow-x-auto">
+        <div className="bg-white rounded-r-xl rounded-b-xl shadow scrollbar-custom overflow-x-auto">
           <table className="w-full border-none min-w-[1000px]">
             <thead className="bg-gray-50">
             <tr>

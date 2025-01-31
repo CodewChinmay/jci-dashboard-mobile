@@ -11,7 +11,7 @@ const Navbar = () => {
     navigate('/');
   }
   return (
-    <div className="navbar flex items-center justify-between border-b-4 border-cyan-200 p-4 h-[80px]">
+    <div className="navbar flex items-center justify-between p-4 h-[80px] border-gray-200">
       <div className="div flex place-items-center space-x-3">
 
 
