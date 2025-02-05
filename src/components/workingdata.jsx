@@ -138,77 +138,117 @@ const Workingdata = () => {
         </div>
 
         {/* Edit Modal */}
-        {isModalOpen && editingData && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white p-4 rounded-lg shadow-lg w-[800px]">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Edit Record</h2>
-                  <button onClick={() => setIsModalOpen(false)} className="text-gray-600">
-                    <X size={24} />
-                  </button>
-                </div>
-                <form onSubmit={handleUpdate}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Working Area</label>
-                  <select
-                      name="workingArea"
-                      value={editingData.workingArea}
-                      onChange={(e) => setEditingData({ ...editingData, workingArea: e.target.value })}
-                      className="text-gray-600 w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                      required
-                  >
-                    <option value="">Select a Working Area</option>
-                    <option value="Management">Management</option>
-                    <option value="Business">Business</option>
-                    <option value="Community">Community</option>
-                    <option value="International Growth and Development">International Growth and Development</option>
-                    <option value="Training">Training</option>
-                  </select>
-                  <label className="block text-sm font-medium text-gray-700">Activity Title</label>
-                  <input
-                      type="text"
-                      value={editingData.title}
-                      onChange={(e) => setEditingData({ ...editingData, title: e.target.value })}
-                      className="w-full p-2 border border-gray-300 rounded-md mb-3"
-                      required
-                  />
-                  <label className="block text-sm font-medium text-gray-700">Date</label>
-                  <input
-                      type="date"
-                      value={editingData.date}
-                      onChange={(e) => setEditingData({ ...editingData, date: e.target.value })}
-                      className="w-full p-2 border border-gray-300 rounded-md mb-3"
-                      required
-                  />
-                  <label className="block text-sm font-medium text-gray-700">Time</label>
-                  <input
-                      type="time"
-                      value={editingData.time}
-                      onChange={(e) => setEditingData({ ...editingData, time: e.target.value })}
-                      className="w-full p-2 border border-gray-300 rounded-md mb-3"
-                      required
-                  />
-                  <label className="block text-sm font-medium text-gray-700">Location</label>
-                  <input
-                      type="text"
-                      value={editingData.location}
-                      onChange={(e) => setEditingData({ ...editingData, location: e.target.value })}
-                      className="w-full p-2 border border-gray-300 rounded-md mb-3"
-                      required
-                  />
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
-                  <textarea
-                      value={editingData.description}
-                      onChange={(e) => setEditingData({ ...editingData, description: e.target.value })}
-                      className="w-full p-2 border border-gray-300 rounded-md mb-3"
-                      required
-                  />
-                  <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded-md mt-2">
-                    Update
-                  </button>
-                </form>
-              </div>
+{isModalOpen && editingData && (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-4 rounded-lg shadow-lg w-[800px]">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Edit Record</h2>
+          <button onClick={() => setIsModalOpen(false)} className="text-gray-600">
+            <X size={24} />
+          </button>
+        </div>
+        <form onSubmit={handleUpdate} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Working Area</label>
+              <select
+                  name="workingArea"
+                  value={editingData.workingArea}
+                  onChange={(e) => setEditingData({ ...editingData, workingArea: e.target.value })}
+                  className="text-gray-600 w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                  required
+              >
+                <option value="">Select a Working Area</option>
+                <option value="Management">Management</option>
+                <option value="Business">Business</option>
+                <option value="Community">Community</option>
+                <option value="International Growth and Development">International Growth and Development</option>
+                <option value="Training">Training</option>
+              </select>
             </div>
-        )}
+
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-medium text-gray-700">Activity Title</label>
+              <input
+                  type="text"
+                  value={editingData.title}
+                  onChange={(e) => setEditingData({ ...editingData, title: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  required
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-medium text-gray-700">Date</label>
+              <input
+                  type="date"
+                  value={editingData.date}
+                  onChange={(e) => setEditingData({ ...editingData, date: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  required
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-medium text-gray-700">Time</label>
+              <input
+                  type="time"
+                  value={editingData.time}
+                  onChange={(e) => setEditingData({ ...editingData, time: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  required
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-medium text-gray-700">Location</label>
+              <input
+                  type="text"
+                  value={editingData.location}
+                  onChange={(e) => setEditingData({ ...editingData, location: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  required
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <textarea
+                  value={editingData.description}
+                  onChange={(e) => setEditingData({ ...editingData, description: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  required
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-medium text-gray-700">YouTube URL</label>
+              <input
+                  type="url"
+                  value={editingData.youtubeUrl}
+                  onChange={(e) => setEditingData({ ...editingData, youtubeUrl: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-medium text-gray-700">Upload Image</label>
+              <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setEditingData({ ...editingData, image: e.target.files[0] })}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          </div>
+
+          <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded-md mt-2">
+            Update
+          </button>
+        </form>
+      </div>
+    </div>
+) }
       </div>
   )
 }

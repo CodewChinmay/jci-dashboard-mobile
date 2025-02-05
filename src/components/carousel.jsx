@@ -31,7 +31,7 @@ const carousel = () => {
   // Handle image deletion
   const deleteImage = async (imageName) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/v1/gallery/delete/${imageName}`, {
+      const response = await fetch(`http://localhost:5000/api/v1/carousel/delete/${imageName}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -93,7 +93,7 @@ const carousel = () => {
         const filenames = uploadResponse.data.uploadedImages.map((image) => image.filename);
 
         await axios.post(
-            "http://localhost:5000/api/v1/gallery/upload",
+            "http://localhost:5000/api/v1/carousel/upload",
             { filenames },
             {
               headers: {
