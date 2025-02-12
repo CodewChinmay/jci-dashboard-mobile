@@ -295,7 +295,7 @@ const registrations = () => {
 
     // Default table view
     return (
-        <div className=" h-screen p-6 overflow-hidden " style={{ width: "calc(100vw - 300px)" , height: "calc(100vh - 80px)" }}>
+        <div className="bg-gray-50 h-screen p-2 overflow-hidden " style={{ height: "calc(100vh - 80px)" }}>
             <div className="flex items-center justify-between ">
                 <h1 className="bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold">Registration Requests</h1>
                 <button
@@ -310,7 +310,7 @@ const registrations = () => {
                 {loading ? (
                     <div className="text-center py-10 text-gray-500">Loading...</div>
                 ) : (
-                    <table className="w-full border-none min-w-[1000px]">
+                    <table className="w-full border-none">
                         <thead className="bg-gray-50">
                         <tr>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">#</th>

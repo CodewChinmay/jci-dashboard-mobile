@@ -20,7 +20,7 @@ function Teamtab() {
   }
 
   return (
-    <div className="flex flex-col ">
+    <div className="flex flex-col">
       <div className="flex h-15 pt-2 bg-gradient-to-r from-gray-200 via-gray-100/90 to-white"> 
 
         {content.map((item, index) => (
@@ -28,7 +28,7 @@ function Teamtab() {
             key={index}
             onClick={() => setActiveContent(item.title)}
             className={`
-              flex items-center gap-2 px-10 py-4 text-sm font-medium text-center whitespace-nowrap 
+              flex items-center gap-2 px-10 py-2 text-sm font-medium text-center whitespace-nowrap 
               ${activeContent === item.title
                 ? "bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold text-4xl"
                 : "text-gray-600 hover:bg-gray-200 hover:text-gray-800"

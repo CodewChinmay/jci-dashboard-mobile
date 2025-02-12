@@ -1,18 +1,17 @@
-
+import React, { useState } from 'react';
 import Navbar from './navbar.jsx'
-import Menu from './menu.jsx'
+import Menu from './Sidebar.jsx'
 
 function App() {
 
-  return (
-    <>
-    <div className="layout">
-    <Navbar/>
-    <Menu/>
-    </div>
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    </>
-  )
+  return (
+      <div>
+        <Navbar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}  />
+        <Menu isOpen={isSidebarOpen} />
+      </div>
+  );
 }
 
 export default App

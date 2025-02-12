@@ -26,7 +26,7 @@ function WorkingTab() {
             key={index}
             onClick={() => setActiveContent(item.title)}
             className={`
-              flex items-center gap-2 px-10 py-4 text-sm font-medium text-center whitespace-nowrap 
+              flex items-center gap-2 px-10 py-2 text-sm font-medium text-center whitespace-nowrap 
               ${activeContent === item.title
                 ? "bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold text-4xl"
                 : "text-gray-600 hover:bg-gray-200 hover:text-gray-800"

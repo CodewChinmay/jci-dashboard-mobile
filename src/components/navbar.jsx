@@ -1,29 +1,37 @@
 import React from "react";
 import logo from '../assets/jciamravati.png';
-
-import { LogOut, RefreshCw, Menu } from 'lucide-react'; // Use PascalCase for imported icons
-
+import { LogOut, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const Navbar = () => {
+const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const navigate = useNavigate();
+
   const handleLogout = () => {
     navigate('/');
-  }
+  };
+
   return (
-    <div className="navbar flex items-center justify-between p-4 h-[80px] border-gray-200">
-      <div className="div flex place-items-center space-x-3">
-
-
-        {/*<Menu className="w-10 h-10 p-2 transition rounded-full hover:bg-gray-200"/>*/}
-        <img src={logo} alt="JCI Logo" className="logo h-[50px]" />
+    <div className="navbar flex items-center justify-between border-b-4 border-cyan-500 p-4 h-[80px]">
+      <div className="flex items-center space-x-4">
+        {/* Menu Icon to Toggle Sidebar */}
+        <Menu
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          size={50}
+          className={`rounded-full hover:bg-gray-200 h-12 w-12 p-2 cursor-pointer ${
+            isSidebarOpen ? "bg-gray-100" : "bg-transparent"
+          }`}
+        />
+        <img src={logo || "/placeholder.svg"} alt="JCI Logo" className="h-[60px]" />
       </div>
-      <div className="div">
-      {/* <RefreshCw size={50} className="shadow-xl bg-blue-200 rounded text-dark hover:text-white hover:bg-gray-600 p-2 h-9 w-9"/> Use the LogOut icon as a component */}
 
-      <LogOut onClick={handleLogout} size={50} className="shadow-xl bg-blue-200 rounded text-dark hover:text-white hover:bg-gray-600 p-2 h-9 w-9"/> {/* Use the LogOut icon as a component */}
+      <div>
+        {/* Logout Icon */}
+        <LogOut
+          onClick={handleLogout}
+          size={50}
+          className="text-gray-600 hover:bg-gray-200 h-11 w-11 p-2 cursor-pointer"
+        />
       </div>
-
     </div>
   );
 };

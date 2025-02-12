@@ -62,22 +62,27 @@ const Workingdata = () => {
     setIsModalOpen(true)
   }
 
-  const handleUpdate = async (e) => {
-    e.preventDefault()
+  const handleUpdate = async (id, updatedData) => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/v1/workingareas/updaterecord/${editingData.id}`, editingData)
-      if (response.status === 200) {
-        setSubmittedData((prev) =>
-            prev.map((item) => (item.id === editingData.id ? { ...editingData } : item))
-        )
-        alert("Updated successfully!")
-        setIsModalOpen(false)
+      const response = await fetch(`http://localhost:5000/api/v1/workingareas/updatedata/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update record");
       }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
-      console.error("Error updating item:", error)
-      alert("Failed to update item.")
+      console.error("Error updating record on frontend:", error);
+      throw error;
     }
-  }
+  };
 
   const filteredData =
   selectedWorkingArea === "All"
@@ -87,7 +92,7 @@ const Workingdata = () => {
     : submittedData.filter(data => data.workingarea === selectedWorkingArea)
 
   return (
-      <div className="p-4 overflow-hidden" style={{ height: "calc(100vh - 140px)" }}>
+      <div className="p-6 bg-gray-50 overflow-hidden" style={{ height: "calc(100vh - 140px)" }}>
         <div className="max-w-7xl mx-auto">
           <div className="bg-white p-4">
           <div className="mb-4">
@@ -95,7 +100,7 @@ const Workingdata = () => {
             <select
               value={selectedWorkingArea}
               onChange={(e) => setSelectedWorkingArea(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
             >
               <option value="All">All Activities</option>
               <option value="highlighted">Highlighted Activities</option>
@@ -218,26 +223,6 @@ const Workingdata = () => {
                   onChange={(e) => setEditingData({ ...editingData, description: e.target.value })}
                   className="w-full p-2 border border-gray-300 rounded-md"
                   required
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="block text-sm font-medium text-gray-700">YouTube URL</label>
-              <input
-                  type="url"
-                  value={editingData.youtubeUrl}
-                  onChange={(e) => setEditingData({ ...editingData, youtubeUrl: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded-md"
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="block text-sm font-medium text-gray-700">Upload Image</label>
-              <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setEditingData({ ...editingData, image: e.target.files[0] })}
-                  className="w-full p-2 border border-gray-300 rounded-md"
               />
             </div>
           </div>
