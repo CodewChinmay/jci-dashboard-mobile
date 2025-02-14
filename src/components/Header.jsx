@@ -17,7 +17,7 @@ const Header = () => {
     // Fetch the list of images from the backend
     const fetchImages = async () => {
         try {
-            const response = await axios.get("http://localhost:5000/api/v1/header/getJCIlogo");
+            const response = await axios.get("https://jciamravati.in/api/v1/header/getJCIlogo");
 
             if (response.data && response.data.logoNames) {
                 // Construct base URL for image fetching
@@ -80,7 +80,7 @@ const Header = () => {
 
                 // Send the filename to your local API
                 await axios.post(
-                    "http://localhost:5000/api/v1/header/upload",
+                    "https://jciamravati.in/api/v1/header/upload",
                     { filenames: [filename] },
                     {
                         headers: {
@@ -107,7 +107,7 @@ const Header = () => {
         if (!confirmDelete) return;
 
         try {
-            const response = await fetch(`http://localhost:5000/api/v1/header/delete/${imageName}`, {
+            const response = await fetch(`https://jciamravati.in/api/v1/header/delete/${imageName}`, {
                 method: "DELETE",
             });
 

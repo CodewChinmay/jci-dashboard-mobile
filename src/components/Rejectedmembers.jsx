@@ -32,7 +32,7 @@ const Rejectedmembers = () => {
 
     const getData = async () => {
         try {
-            const response = await fetch("http://localhost:5000/api/v1/membership/Rejectedmembers");
+            const response = await fetch("https://jciamravati.in/api/v1/membership/Rejectedmembers");
             if (!response.ok) throw new Error('Network response was not ok');
 
             const fetchedData = await response.json();
@@ -66,7 +66,7 @@ const Rejectedmembers = () => {
             const confirmDelete = window.confirm("Are you sure you want to delete this member?");
             if (!confirmDelete) return; // Stop the delete if user cancels
 
-            await axios.delete(`http://localhost:5000/api/v1/membership/delete/${id}`);
+            await axios.delete(`https://jciamravati.in/api/v1/membership/delete/${id}`);
             console.log(`Deleted Member ${name}`)
             getData();
             closeModal();

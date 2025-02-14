@@ -51,7 +51,7 @@ const Formregistrations = () => {
   // Fetch data from the API
   const getData = async (type = "all") => {
     try {
-      let url = "http://localhost:5000/api/v1/membership/generalmembers";
+      let url = "https://jciamravati.in/api/v1/membership/generalmembers";
 
 
       const response = await fetch(url);

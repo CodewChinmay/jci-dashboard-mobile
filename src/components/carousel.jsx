@@ -13,7 +13,7 @@ const carousel = () => {
   // Fetch images from the server
   const fetchImages = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/v1/carousel/images");
+      const response = await axios.get("https://jciamravati.in/api/v1/carousel/images");
       const baseUrl =
           "https://media.bizonance.in/api/v1/image/download/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati";
       const mappedImages = response.data.imageNames.map((name) => ({
@@ -31,7 +31,7 @@ const carousel = () => {
   // Handle image deletion
   const deleteImage = async (imageName) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/v1/carousel/delete/${imageName}`, {
+      const response = await fetch(`https://jciamravati.in/api/v1/carousel/delete/${imageName}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -93,7 +93,7 @@ const carousel = () => {
         const filenames = uploadResponse.data.uploadedImages.map((image) => image.filename);
 
         await axios.post(
-            "http://localhost:5000/api/v1/carousel/upload",
+            "https://jciamravati.in/api/v1/carousel/upload",
             { filenames },
             {
               headers: {

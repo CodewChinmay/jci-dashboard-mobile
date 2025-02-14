@@ -12,7 +12,7 @@ const Gallery = () => {
   // Fetch images from the server
   const fetchImages = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/v1/gallery/images");
+      const response = await axios.get("https://jciamravati.in/api/v1/gallery/images");
   
       console.log("Gallery API Response:", response.data); // Debugging
   
@@ -40,7 +40,7 @@ const Gallery = () => {
   // Handle image deletion
   const deleteImage = async (imageName) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/v1/gallery/delete/${imageName}`, {
+      const response = await fetch(`https://jciamravati.in/api/v1/gallery/delete/${imageName}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -102,7 +102,7 @@ const Gallery = () => {
         const filenames = uploadResponse.data.uploadedImages.map((image) => image.filename);
 
         await axios.post(
-            "http://localhost:5000/api/v1/gallery/upload",
+            "https://jciamravati.in/api/v1/gallery/upload",
             { filenames },
             {
               headers: {

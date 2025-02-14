@@ -21,7 +21,7 @@ const Team = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/team/getteam");
+        const response = await axios.get("https://jciamravati.in/api/v1/team/getteam");
         setSubmittedData(response.data.data || []);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -76,7 +76,7 @@ const Team = () => {
         };
 
         const postResponse = await axios.post(
-          "http://localhost:5000/api/v1/team/uploadteam",
+          "https://jciamravati.in/api/v1/team/uploadteam",
           teamData
         );
 
@@ -146,7 +146,7 @@ const Team = () => {
       };
 
       const updateResponse = await axios.put(
-        `http://localhost:5000/api/v1/team/update/${editingData.id}`,
+        `https://jciamravati.in/api/v1/team/update/${editingData.id}`,
         updatedData
       );
 
@@ -175,7 +175,7 @@ const Team = () => {
         await axios.get(link);
       }
 
-      await axios.delete(`http://localhost:5000/api/v1/team/deleteteam/${id}`);
+      await axios.delete(`https://jciamravati.in/api/v1/team/deleteteam/${id}`);
       setSubmittedData((prev) => prev.filter((item) => item.id !== id));
       alert("Item deleted successfully!");
     } catch (error) {

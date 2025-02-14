@@ -41,7 +41,7 @@ const registrations = () => {
     const getData = async () => {
         try {
             setLoading(true); // Set loading to true before fetching
-            const response = await fetch("http://localhost:5000/api/v1/membership/getforms");
+            const response = await fetch("https://jciamravati.in/api/v1/membership/getforms");
             const fetchedData = await response.json();
             setData(fetchedData);
 
@@ -126,7 +126,7 @@ const registrations = () => {
     const rejectForm = async (formId, reason) => {
         try {
             const response = await fetch(
-                `http://localhost:5000/api/v1/membership/reject/${formId}`,
+                `https://jciamravati.in/api/v1/membership/reject/${formId}`,
                 {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
@@ -152,7 +152,7 @@ const registrations = () => {
     // Accept form confirmation and update
     const acceptForm = async (Formid) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/v1/membership/accept/${Formid}`, {
+            const response = await fetch(`https://jciamravati.in/api/v1/membership/accept/${Formid}`, {
                 method: "PATCH",
             });
             const data = await response.json();
