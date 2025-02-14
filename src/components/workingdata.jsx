@@ -11,7 +11,7 @@ const Workingdata = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("https://jciamravati.in/api/v1/workingareas/getrecord")
+        const response = await axios.get("http://localhost:5000/api/v1/workingareas/getrecord")
         setSubmittedData(response.data.data || [])
       } catch (error) {
         console.error("Error fetching data:", error)
@@ -25,7 +25,7 @@ const Workingdata = () => {
     if (!window.confirm("Are you sure you want to delete this item?")) return
 
     try {
-      await axios.delete(`https://jciamravati.in/api/v1/workingareas/deleterecord/${id}`)
+      await axios.delete(`http://localhost:5000/api/v1/workingareas/deleterecord/${id}`)
       alert("Item deleted successfully!")
       setSubmittedData((prev) => prev.filter((item) => item.id !== id))
     } catch (error) {
@@ -40,7 +40,7 @@ const Workingdata = () => {
 
     try {
       const response = await axios.patch(
-          `https://jciamravati.in/api/v1/workingareas/highlight/${id}`,
+          `http://localhost:5000/api/v1/workingareas/highlight/${id}`,
           { highlighted: newHighlightStatus },
           { headers: { "Content-Type": "application/json" } }
       )
@@ -64,7 +64,7 @@ const Workingdata = () => {
 
   const handleUpdate = async (id, updatedData) => {
     try {
-      const response = await fetch(`https://jciamravati.in/api/v1/workingareas/updatedata/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/v1/workingareas/updatedata/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

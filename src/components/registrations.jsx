@@ -3,6 +3,9 @@ import { RefreshCcw, FileX2, FileCheck2, XCircle } from "lucide-react";
 import "./pdf.css";
 
 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 
 const Section = ({ title, children }) => (
@@ -122,7 +125,7 @@ const registrations = () => {
         setShowAcceptPopup(false);
     };
 
-    // Reject form with reason
+// Reject form with reason
     const rejectForm = async (formId, reason) => {
         try {
             const response = await fetch(
@@ -137,17 +140,18 @@ const registrations = () => {
             const data = await response.json();
 
             if (response.ok) {
-                alert(data.message);
+                toast.success(data.message); // Use success toast instead of alert
                 getData();  // Refresh the data
                 closeRejectPopup();  // Close the popup
             } else {
-                alert(data.error || "Failed to reject form");
+                toast.error(data.error || "Failed to reject form"); // Use error toast
             }
         } catch (error) {
             console.error("Rejection error:", error);
-            alert("Failed to reject form. Please try again.");
+            toast.error("Failed to reject form. Please try again.");
         }
     };
+
 
     // Accept form confirmation and update
     const acceptForm = async (Formid) => {
@@ -185,6 +189,9 @@ const registrations = () => {
                 className="p-6 bg-gray-100 overflow-hidden overflow-y-scroll"
                 style={{ height: "calc(100vh - 80px)" }}
             >
+
+                <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} />
+
                 <div className="buttons flex space-x-4 mb-4">
                     {/* Back button */}
                     <button
@@ -340,6 +347,7 @@ const registrations = () => {
                     </table>
                 )}
             </div>
+
         </div>
     );
 };

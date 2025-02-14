@@ -22,8 +22,13 @@ const sidebarItems = [
   { title: "Working Areas", Icon: PencilRuler, Content: Workingtab },
 ]
 
-function Sidebar({ isOpen: propIsOpen}) {
-  const [activeContent, setActiveContent] = useState(sidebarItems[0].title)
+function Sidebar({ isOpen: propIsOpen }) {
+  // Initialize activeContent from localStorage or default to the first sidebar item
+  const [activeContent, setActiveContent] = useState(() => {
+    const savedActiveContent = localStorage.getItem("activeContent")
+    return savedActiveContent ? JSON.parse(savedActiveContent) : sidebarItems[0].title
+  })
+
   const [isMobile, setIsMobile] = useState(false)
   const [isOpen, setIsOpen] = useState(propIsOpen)
 
@@ -43,9 +48,14 @@ function Sidebar({ isOpen: propIsOpen}) {
   useEffect(() => {
     setIsOpen(propIsOpen)
     if (isMobile) {
-      propIsOpen:false
+      // Optionally, you can adjust the logic for mobile here
     }
-  }, [propIsOpen],[isMobile])
+  }, [propIsOpen, isMobile])
+
+  // Persist activeContent to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("activeContent", JSON.stringify(activeContent))
+  }, [activeContent])
 
   const getContent = (title) => {
     const item = sidebarItems.find((item) => item.title === title)
@@ -66,8 +76,8 @@ function Sidebar({ isOpen: propIsOpen}) {
           <button
             key={index}
             onClick={() => {
-              setActiveContent(item.title);
-              if (isMobile) setIsOpen(false);
+              setActiveContent(item.title)
+              if (isMobile) setIsOpen(false)
             }}
             className={`flex items-center ${
               isOpen ? "justify-start space-x-3 whitespace-nowrap" : "justify-center"
@@ -89,8 +99,8 @@ function Sidebar({ isOpen: propIsOpen}) {
           <button
             key={index}
             onClick={() => {
-              setActiveContent(item.title);
-              setIsOpen(false);
+              setActiveContent(item.title)
+              setIsOpen(false)
             }}
             className={`flex items-center ${
               isOpen ? "justify-start space-x-3 whitespace-nowrap" : "justify-center"
@@ -108,27 +118,6 @@ function Sidebar({ isOpen: propIsOpen}) {
     </div>
   )
 
-  // const renderMobileBottomBar = () => (
-  //   <div className="fixed bottom-0 left-0 right-0 bg-gray-100 shadow-md z-50">
-  //     <div className="flex justify-around items-center h-16 px-1 space-x-4">
-  //       {sidebarItems.slice(0, 4).map((item, index) => {
-  //         const { Icon } = item
-  //         return (
-  //           <button
-  //             key={index}
-  //             onClick={() => setActiveContent(item.title)}
-  //             className={`flex flex-col items-center justify-center h-full transition-colors duration-200 ease-in-out
-  //               ${activeContent === item.title ? "bg-blue-300 text-white" : "text-gray-700"}`}
-  //           >
-  //             <Icon className="w-6 h-6 mb-1" />
-  //             <span className="text-xs">{item.title}</span>
-  //           </button>
-  //         )
-  //       })}
-  //     </div>
-  //   </div>
-  // )
-
   return (
     <div className={`flex ${isMobile ? "flex-col" : "h-[calc(100vh-5rem)]"}`}>
       {isMobile && (
@@ -139,14 +128,9 @@ function Sidebar({ isOpen: propIsOpen}) {
       {renderSidebarContent()}
       <div
         className={`content flex-1 overflow-y-auto bg-white ${isMobile ? "pt-16 pb-20 px-4" : ""}`}
-        style={{
-          marginLeft: isMobile ? 0 : isOpen ? "" : "",
-          transition: "",
-        }}
       >
         {getContent(activeContent)}
       </div>
-      {/* {isMobile && renderMobileBottomBar()} */}
     </div>
   )
 }
