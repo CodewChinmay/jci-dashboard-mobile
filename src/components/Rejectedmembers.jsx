@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { RefreshCcw, Trash2, MoveLeft, UserPlus, Ban, XCircle } from "lucide-react";
+import { RefreshCcw, Trash2, MoveLeft, XCircle } from "lucide-react";
 import axios from "axios";
 import "./pdf.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Reusable Components
 const Section = ({ title, children }) => (
@@ -28,12 +30,12 @@ const Rejectedmembers = () => {
     const [data, setData] = useState([]);
     const [headers, setHeaders] = useState([]);
     const [selectedRow, setSelectedRow] = useState(null);
-    const [rejectionReason, setRejectionReason] = useState("");
 
+    // Fetch data from the API
     const getData = async () => {
         try {
-            const response = await fetch("http://localhost:5000/api/v1/membership/Rejectedmembers");
-            if (!response.ok) throw new Error('Network response was not ok');
+            const response = await fetch("https://jciamravati.in/api/v1/membership/Rejectedmembers");
+            if (!response.ok) throw new Error("Network response was not ok");
 
             const fetchedData = await response.json();
             setData(fetchedData);
@@ -48,140 +50,182 @@ const Rejectedmembers = () => {
                         return [...acc, newKey];
                     }, []);
 
-                const uniqueHeaders = [...new Set(extractHeaders(fetchedData[0]).filter(
-                    header => !header.toLowerCase().includes("id")
-                ))];
+                const uniqueHeaders = [
+                    ...new Set(
+                        extractHeaders(fetchedData[0]).filter((header) => !header.toLowerCase().includes("id"))
+                    ),
+                ];
                 setHeaders(uniqueHeaders);
             }
         } catch (error) {
             console.error("Fetch error:", error);
+            toast.error("Failed to fetch rejected members");
         }
     };
 
-
-
-
+    // Delete a member by id with confirmation and toast notifications
     const deleteMember = async (id) => {
         try {
             const confirmDelete = window.confirm("Are you sure you want to delete this member?");
-            if (!confirmDelete) return; // Stop the delete if user cancels
+            if (!confirmDelete) return; // Stop if user cancels
 
-            await axios.delete(`http://localhost:5000/api/v1/membership/delete/${id}`);
-            console.log(`Deleted Member ${name}`)
+            await axios.delete(`https://jciamravati.in/api/v1/membership/delete/${id}`);
+            toast.success("Member deleted successfully");
             getData();
             closeModal();
         } catch (error) {
             console.error("Delete error:", error);
+            toast.error("Failed to delete member");
         }
     };
 
     const openModal = (row) => setSelectedRow(row);
     const closeModal = () => setSelectedRow(null);
 
+    // Helper function to get nested values from objects
     const getNestedValue = (obj, path) =>
         path.split(".").reduce((acc, part) => acc?.[part] ?? "N/A", obj);
 
-    useEffect(() => { getData(); }, []);
+    useEffect(() => {
+        getData();
+    }, []);
 
-    if (!data.length) return <div className="text-center text-gray-500 p-4">No rejected members found</div>;
+    // Determine what to render based on state
+    let content = null;
 
-    if (selectedRow) return (
-        <div className="p-6" style={{ height: "calc(100vh - 80px)" }}>
-            <div className="flex flex-wrap gap-4 mb-6">
-                <button className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center shadow-md transition-all" onClick={closeModal}>
-                    <MoveLeft className="w-4 h-4 mr-2" /> Back
-                </button>
-                <button
-                    className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center shadow-md transition-all"
-                    onClick={() => {
-                        console.log(`Name: ${selectedRow.Name}, Form ID: ${selectedRow.Formid}`);
-                        deleteMember(selectedRow.Formid);
-                    }}
-                >
-                    <Trash2 className="w-4 h-4 mr-2" /> Delete
-                </button>
-
+    // If no data available, show a message
+    if (!data.length) {
+        content = (
+            <div className="text-center text-gray-500 p-4">
+                No rejected members found
             </div>
-
-            <div className="relative bg-white rounded-xl shadow-lg border border-gray-200 p-8">
-                {/* Rejection Details Box Positioned at Top Right */}
-                <div className="absolute top-[-50px] right-4 bg-rose-200 p-4 rounded-lg border border-rose-200 shadow-sm w-72">
-                    <h4 className="text-rose-700 font-semibold flex items-center mb-2">
-                        <XCircle className="w-5 h-5 mr-2" /> Reject Reason
-                    </h4>
-                    <div className="p-3 bg-white rounded-lg border border-gray-300 text-sm">
-                        {selectedRow.rejectreason || "No rejection reason provided"}
-                    </div>
+        );
+    }
+    // If a row is selected, show the detail modal view
+    else if (selectedRow) {
+        content = (
+            <div className="p-6" style={{ height: "calc(100vh - 80px)" }}>
+                <div className="flex flex-wrap gap-4 mb-6">
+                    <button
+                        className="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center shadow-md transition-all"
+                        onClick={closeModal}
+                    >
+                        <MoveLeft className="w-4 h-4 mr-2" /> Back
+                    </button>
+                    <button
+                        className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center shadow-md transition-all"
+                        onClick={() => {
+                            console.log(
+                                `Name: ${selectedRow.Name}, Form ID: ${selectedRow.Formid}`
+                            );
+                            deleteMember(selectedRow.Formid);
+                        }}
+                    >
+                        <Trash2 className="w-4 h-4 mr-2" /> Delete
+                    </button>
                 </div>
 
-                {/* Personal Information Section */}
-                <Section title="Personal Information" className="relative">
-                    <InfoGrid cols="3">
-                        <InfoItem label="Name" value={selectedRow.Name || "N/A"} />
-                        <InfoItem label="D.O.B" value={selectedRow.Dob || "N/A"} />
-                        <InfoItem label="Mobile Number" value={selectedRow.Mobileno || "N/A"} />
-                        <InfoItem label="Blood Group" value={selectedRow.Bloodgroup || "N/A"} />
-                        <InfoItem label="Education" value={selectedRow.Education || "N/A"} />
-                        <InfoItem label="Postal Address" value={selectedRow.Postaladdress || "N/A"} />
-                        <InfoItem label="Married Status" value={selectedRow.Mstatus || "N/A"} />
-                        <InfoItem label="Wife's Name" value={selectedRow.Wifename || "N/A"} />
-                        <InfoItem label="Wife's D.O.B" value={selectedRow.Wdob || "N/A"} />
-                        <InfoItem label="Wife's Mobile Number" value={selectedRow.Wmobileno || "N/A"} />
-                        <InfoItem label="Child's Name" value={selectedRow.Childname || "N/A"} />
-                        <InfoItem label="Occupation" value={selectedRow.Occupation || "N/A"} />
-                        <InfoItem label="Occupation Details" value={selectedRow.Occupationdetail || "N/A"} />
-                        <InfoItem label="Address" value={selectedRow.Address || "N/A"} />
-                        <InfoItem label="Expectations" value={selectedRow.Expectation || "N/A"} />
-                        <InfoItem label="JC Name" value={selectedRow.Jcname || "N/A"} />
-                    </InfoGrid>
-                </Section>
-            </div>
-        </div>
-    );
+                <div className="relative bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+                    {/* Rejection Details Box Positioned at Top Right */}
+                    <div className="absolute top-[-50px] right-4 bg-rose-200 p-4 rounded-lg border border-rose-200 shadow-sm w-72">
+                        <h4 className="text-rose-700 font-semibold flex items-center mb-2">
+                            <XCircle className="w-5 h-5 mr-2" /> Reject Reason
+                        </h4>
+                        <div className="p-3 bg-white rounded-lg border border-gray-300 text-sm">
+                            {selectedRow.rejectreason || "No rejection reason provided"}
+                        </div>
+                    </div>
 
-    return (
-        <div className="p-2 overflow-hidden" style={{  height: "calc(100vh - 80px)" }}>
-            <div className="flex items-center justify-between">
-                <h1 className="bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold ">Rejected Members</h1>
-                <button
-                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                    onClick={getData}
-                >
-                    <RefreshCcw className="w-5 h-5" />
-                </button>
+                    {/* Personal Information Section */}
+                    <Section title="Personal Information">
+                        <InfoGrid cols="3">
+                            <InfoItem label="Name" value={selectedRow.Name || "N/A"} />
+                            <InfoItem label="D.O.B" value={selectedRow.Dob || "N/A"} />
+                            <InfoItem label="Mobile Number" value={selectedRow.Mobileno || "N/A"} />
+                            <InfoItem label="Blood Group" value={selectedRow.Bloodgroup || "N/A"} />
+                            <InfoItem label="Education" value={selectedRow.Education || "N/A"} />
+                            <InfoItem label="Postal Address" value={selectedRow.Postaladdress || "N/A"} />
+                            <InfoItem label="Married Status" value={selectedRow.Mstatus || "N/A"} />
+                            <InfoItem label="Wife's Name" value={selectedRow.Wifename || "N/A"} />
+                            <InfoItem label="Wife's D.O.B" value={selectedRow.Wdob || "N/A"} />
+                            <InfoItem label="Wife's Mobile Number" value={selectedRow.Wmobileno || "N/A"} />
+                            <InfoItem label="Child's Name" value={selectedRow.Childname || "N/A"} />
+                            <InfoItem label="Occupation" value={selectedRow.Occupation || "N/A"} />
+                            <InfoItem label="Occupation Details" value={selectedRow.Occupationdetail || "N/A"} />
+                            <InfoItem label="Address" value={selectedRow.Address || "N/A"} />
+                            <InfoItem label="Expectations" value={selectedRow.Expectation || "N/A"} />
+                            <InfoItem label="JC Name" value={selectedRow.Jcname || "N/A"} />
+                        </InfoGrid>
+                    </Section>
+                </div>
             </div>
+        );
+    }
+    // Otherwise, show the table view with a refresh button
+    else {
+        content = (
+            <div className="p-2 overflow-hidden" style={{ height: "calc(100vh - 80px)" }}>
+                <div className="flex items-center justify-between">
+                    <h1 className="bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold ">
+                        Rejected Members
+                    </h1>
+                    <button
+                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        onClick={getData}
+                    >
+                        <RefreshCcw className="w-5 h-5" />
+                    </button>
+                </div>
 
-            <div className="bg-white shadow rounded-r-xl rounded-b-xl scrollbar-custom overflow-hidden overflow-x-scroll">
-                <table className="w-full border-none">
-                    <thead className="bg-gray-50">
-                    <tr>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">#</th>
-                        {headers.map(header => (
-                            <th key={header} className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                {header.replace(/_/g, " ")}
+                <div className="bg-white shadow rounded-r-xl rounded-b-xl scrollbar-custom overflow-hidden overflow-x-scroll">
+                    <table className="w-full border-none">
+                        <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                                #
                             </th>
-                        ))}
-                    </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                    {data.map((item, index) => (
-                        <tr
-                            key={index}
-                            className={`hover:bg-gray-50 cursor-pointer ${item.highlighted ? "bg-green-50" : ""}`}
-                            onClick={() => openModal(item)}
-                        >
-                            <td className="px-4 py-3 text-gray-600">{index + 1}</td>
-                            {headers.map(header => (
-                                <td key={header} className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                                    {getNestedValue(item, header)}
-                                </td>
+                            {headers.map((header) => (
+                                <th
+                                    key={header}
+                                    className="px-4 py-3 text-left text-sm font-semibold text-gray-700"
+                                >
+                                    {header.replace(/_/g, " ")}
+                                </th>
                             ))}
                         </tr>
-                    ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                        {data.map((item, index) => (
+                            <tr
+                                key={index}
+                                className={`hover:bg-gray-50 cursor-pointer ${
+                                    item.highlighted ? "bg-green-50" : ""
+                                }`}
+                                onClick={() => openModal(item)}
+                            >
+                                <td className="px-4 py-3 text-gray-600">{index + 1}</td>
+                                {headers.map((header) => (
+                                    <td
+                                        key={header}
+                                        className="px-4 py-3 text-gray-600 whitespace-nowrap"
+                                    >
+                                        {getNestedValue(item, header)}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        );
+    }
+
+    return (
+        <>
+            {content}
+            <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} />
+        </>
     );
 };
 

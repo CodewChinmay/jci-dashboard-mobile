@@ -23,7 +23,7 @@ const Workingareas = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/workingareas/getrecord")
+        const response = await axios.get("https://jciamravati.in/api/v1/workingareas/getrecord")
         setSubmittedData(response.data.data || [])
       } catch (error) {
         console.error("Error fetching data:", error)
@@ -112,7 +112,7 @@ const Workingareas = () => {
           highlighted: false,
         }
 
-        const postResponse = await axios.post("http://localhost:5000/api/v1/workingareas/upload", workingAreaData, {
+        const postResponse = await axios.post("https://jciamravati.in/api/v1/workingareas/upload", workingAreaData, {
           headers: { "Content-Type": "application/json" },
         })
 
@@ -146,7 +146,7 @@ const Workingareas = () => {
         }
       }
 
-      await axios.delete(`http://localhost:5000/api/v1/workingareas/deleterecord/${id}`)
+      await axios.delete(`https://jciamravati.in/api/v1/workingareas/deleterecord/${id}`)
       alert("Item and related data deleted successfully!")
 
       setSubmittedData((prev) => prev.filter((item) => item.id !== id))
@@ -162,7 +162,7 @@ const Workingareas = () => {
 
     try {
       const response = await axios.patch(
-          `http://localhost:5000/api/v1/workingareas/highlight/${id}`,
+          `https://jciamravati.in/api/v1/workingareas/highlight/${id}`,
           { highlighted: newHighlightStatus },
           { headers: { "Content-Type": "application/json" } },
       )

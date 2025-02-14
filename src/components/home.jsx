@@ -22,10 +22,10 @@ export default function Home({ setActiveContent }) {
             }
         }
 
-        fetchData("http://localhost:5000/api/v1/membership/getforms", setPackages, false);
-        fetchData("http://localhost:5000/api/v1/membership/generalmembers", setReview);
-        fetchData("http://localhost:5000/api/v1/membership/Rejectedmembers", setBlogs);
-        fetchData("https://triphouse.co.in/api/v1/contact/getdata", setData);
+        fetchData("https://jciamravati.in/api/v1/membership/getforms", setPackages, false);
+        fetchData("https://jciamravati.in/api/v1/membership/generalmembers", setReview);
+        fetchData("https://jciamravati.in/api/v1/membership/Rejectedmembers", setBlogs);
+        // fetchData("https://triphouse.co.in/api/v1/contact/getdata", setData);
     }, []);
 
     const stats = [
