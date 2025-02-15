@@ -22,16 +22,16 @@ export default function Home({ setActiveContent }) {
             }
         }
 
-        fetchData("http://localhost:5000/api/v1/membership/getforms", setPackages, false);
-        fetchData("http://localhost:5000/api/v1/membership/generalmembers", setReview);
-        fetchData("http://localhost:5000/api/v1/membership/Rejectedmembers", setBlogs);
+        fetchData("https://jciamravati.in/api/v1/membership/getforms", setPackages, false);
+        fetchData("https://jciamravati.in/api/v1/membership/generalmembers", setReview);
+        fetchData("https://jciamravati.in/api/v1/membership/Rejectedmembers", setBlogs);
         fetchData("https://triphouse.co.in/api/v1/contact/getdata", setData);
     }, []);
 
     const stats = [
-        { title: "Registration Requests", count: packages.length, icon: <Users className="w-6 h-6 text-blue-600" />, bg: "bg-blue-100" },
-        { title: "General Members", count: review.length, icon: <Star className="w-6 h-6 text-green-600" />, bg: "bg-green-100" },
-        { title: "Rejected Members", count: blogs.length, icon: <UserRoundX className="w-6 h-6 text-red-600" />, bg: "bg-red-100" },
+        { title: "Registration Requests", count: packages.length, icon: <Users className="w-6 h-6 text-white" />, bg: "bg-blue-400" },
+        { title: "General Members", count: review.length, icon: <Star className="w-6 h-6 text-white" />, bg: "bg-green-400" },
+        { title: "Rejected Members", count: blogs.length, icon: <UserRoundX className="w-6 h-6 text-white" />, bg: "bg-red-400" },
         // { title: "Contact", count: data.length, icon: <UserPlus className="w-6 h-6 text-purple-600" />, bg: "bg-purple-100" },
         // { title: "Visit Website", count: 0, icon: <Globe className="w-6 h-6 text-green-600" />, bg: "bg-green-100", redirectUrl: "https://triphouse.co.in/" }
     ];
@@ -43,7 +43,7 @@ export default function Home({ setActiveContent }) {
                 {stats.map((stat, index) => (
                     <div
                         key={index}
-                        className="text-cyan-600 p-6 rounded-md border-2 border-cyan-600 transition-shadow duration-200 flex justify-between items-center hover:bg-gray-100"
+                        className="text-cyan-600 p-6 rounded-md shadow-xl transition-shadow duration-200 flex justify-between items-center cursor-pointer"
                         onClick={() => {
                             setActiveContent(stat.title); // This will update activeContent in Sidebar
                             if (stat.redirectUrl) {
@@ -58,7 +58,7 @@ export default function Home({ setActiveContent }) {
                             <h3 className="text-lg font-medium text-cyan-600 ">{stat.title}</h3>
                         </div>
                         {stat.redirectUrl ? null : (
-                            <p className="text-3xl font-boldtext-cyan-600">{stat.count}</p>
+                            <p className="text-3xl font-bold text-cyan-600">{stat.count}</p>
                         )}
                     </div>
                 ))}
