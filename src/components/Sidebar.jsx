@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Users, UserRoundX, UserRoundCheck, HomeIcon, Briefcase, ImagePlus, PencilRuler, Menu } from "lucide-react"
+import { Users, UserRoundX, UserRoundCheck, HomeIcon, Briefcase, ImagePlus, PencilRuler, UserRoundPlus  } from "lucide-react"
 import Formregistrations from "./formregistrations.jsx"
+import Addmember from "./addmember.jsx"
 import Registrations from "./registrations.jsx"
 import RejectedForms from "./Rejectedmembers.jsx"
 import Gallery from "./gallery.jsx"
@@ -14,9 +15,10 @@ import Home from "./home.jsx"
 const sidebarItems = [
   { title: "Home", Content: Home, Icon: HomeIcon },
   { title: "Registration Requests", Content: Registrations, Icon: Users },
+  { title: "Add Member", Content: Addmember, Icon: UserRoundPlus  },
   { title: "General Members", Icon: UserRoundCheck, Content: Formregistrations },
   { title: "Rejected Members", Icon: UserRoundX, Content: RejectedForms },
-  { title: "Team", Icon: Briefcase, Content: Teamtab },
+  { title: "Board Member", Icon: Briefcase, Content: Teamtab },
   { title: "Gallery", Icon: ImagePlus, Content: Gallery },
   { title: "Carousel", Icon: ImagePlus, Content: Carousel },
   { title: "Working Areas", Icon: PencilRuler, Content: Workingtab },
@@ -85,7 +87,7 @@ function Sidebar({ isOpen: propIsOpen }) {
               ${
                 activeContent === item.title
                   ? "bg-cyan-600 text-white whitespace-nowrap"
-                  : "text-gray-700 hover:bg-gray-200"
+                  : "text-gray-700 hover:bg-gray-300"
               }`}
           >
             <item.Icon className={`transition-all duration-300 w-6 h-6`} />

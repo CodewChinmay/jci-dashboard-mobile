@@ -1,5 +1,5 @@
 import React from "react";
-import logo from '../assets/jciamravati.png';
+import logo from '../assets/JCI.png';
 import { LogOut, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

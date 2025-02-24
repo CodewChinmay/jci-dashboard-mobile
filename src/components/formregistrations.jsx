@@ -268,3 +268,4 @@ const Formregistrations = () => {
 };
 
 export default Formregistrations;
+

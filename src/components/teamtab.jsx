@@ -2,15 +2,18 @@ import { useState } from "react";
 // import { PackageIcon, PlusCircleIcon } from "lucide-react"; // Import icons
 
 import AddTeam from "./addteam";
-import Workingdata from "./workingdata";
+
 import Team from "./team";
 
+import Designations from "./adddesign.jsx";
+
 function Teamtab() {
-  const [activeContent, setActiveContent] = useState("Team");
+  const [activeContent, setActiveContent] = useState("Board Member");
 
   const content = [
-    { title: "Team", content: <Team />  },
+    { title: "Board Member", content: <Team />  },
     { title: "Add Team", content: <AddTeam /> },
+      { title: "Add Designations", content: <Designations /> },
     
   ];
 

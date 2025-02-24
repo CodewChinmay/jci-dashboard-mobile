@@ -55,10 +55,10 @@ export default function Home({ setActiveContent }) {
                             <div className={`w-12 h-12 ${stat.bg} rounded-xl flex items-center justify-center`}>
                                 {stat.icon}
                             </div>
-                            <h3 className="text-lg font-medium text-cyan-600 ">{stat.title}</h3>
+                            <h3 className="text-lg font-medium text-black ">{stat.title}</h3>
                         </div>
                         {stat.redirectUrl ? null : (
-                            <p className="text-3xl font-bold text-cyan-600">{stat.count}</p>
+                            <p className="text-3xl font-bold text-black">{stat.count}</p>
                         )}
                     </div>
                 ))}
