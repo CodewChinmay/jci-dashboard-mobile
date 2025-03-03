@@ -1,7 +1,7 @@
 {
   "name": "dashboard-jci",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -24,6 +24,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.2",
     "lucide-react": "^0.471.2",
+    "pixora-icons": "^1.0.25",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.8",
     "react-dom": "^18.3.1",

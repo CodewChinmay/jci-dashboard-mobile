@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { RefreshCcw, FileX2, FileCheck2, XCircle } from "lucide-react";
+import { RefreshCcw, FileX2, FileCheck2 } from "lucide-react";
 import "./pdf.css";
-
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-
 
 const Section = ({ title, children }) => (
     <section className="space-y-4">
@@ -33,12 +30,21 @@ const InfoItem = ({ label, value }) => (
 const registrations = () => {
     // State variables
     const [data, setData] = useState([]); // Store fetched data
-    const [headers, setHeaders] = useState([]); // Store dynamic headers
     const [selectedRow, setSelectedRow] = useState(null); // Store the selected row for modal
     const [loading, setLoading] = useState(true); // Track loading state
     const [showRejectPopup, setShowRejectPopup] = useState(false); // Show/hide reject popup
     const [rejectReason, setRejectReason] = useState(""); // Store reject reason
     const [showAcceptPopup, setShowAcceptPopup] = useState(false); // Show/hide accept popup
+
+    // Fixed table columns for listing in table view
+    const tableColumns = [
+        { label: "Name", key: "Name" },
+        { label: "D.O.B", key: "Dob" },
+        { label : "Occupation", key: "Occupation" },
+        { label: "Mobile Number", key: "Mobileno" },
+        { label: "JC Name", key: "Jcname" },
+
+    ];
 
     // Fetch data from the API
     const getData = async () => {
@@ -47,34 +53,6 @@ const registrations = () => {
             const response = await fetch("https://jciamravati.in/api/v1/membership/getforms");
             const fetchedData = await response.json();
             setData(fetchedData);
-
-            // Extract headers from the first object
-            if (fetchedData && fetchedData.length > 0) {
-                const extractHeaders = (item) => {
-                    const getAllKeys = (obj, prefix = "") =>
-                        Object.keys(obj).reduce((acc, key) => {
-                            const newKey = prefix ? `${prefix}.${key}` : key;
-                            if (
-                                typeof obj[key] === "object" &&
-                                obj[key] !== null &&
-                                !Array.isArray(obj[key])
-                            ) {
-                                return [...acc, ...getAllKeys(obj[key], newKey)];
-                            }
-                            return [...acc, newKey];
-                        }, []);
-                    return getAllKeys(item);
-                };
-
-                const uniqueHeaders = [
-                    ...new Set(
-                        extractHeaders(fetchedData[0]).filter(
-                            (header) => !header.toLowerCase().includes("id")
-                        )
-                    ),
-                ];
-                setHeaders(uniqueHeaders);
-            }
         } catch (error) {
             console.error(`Error fetching data: ${error}`);
         } finally {
@@ -86,7 +64,6 @@ const registrations = () => {
     useEffect(() => {
         getData();
     }, []);
-
 
     // Helper function to get nested values
     const getNestedValue = (obj, path) =>
@@ -125,7 +102,7 @@ const registrations = () => {
         setShowAcceptPopup(false);
     };
 
-// Reject form with reason
+    // Reject form with reason
     const rejectForm = async (formId, reason) => {
         try {
             const response = await fetch(
@@ -141,8 +118,8 @@ const registrations = () => {
 
             if (response.ok) {
                 toast.success(data.message); // Use success toast instead of alert
-                getData();  // Refresh the data
-                closeRejectPopup();  // Close the popup
+                getData(); // Refresh the data
+                closeRejectPopup(); // Close the popup
             } else {
                 toast.error(data.error || "Failed to reject form"); // Use error toast
             }
@@ -151,7 +128,6 @@ const registrations = () => {
             toast.error("Failed to reject form. Please try again.");
         }
     };
-
 
     // Accept form confirmation and update
     const acceptForm = async (Formid) => {
@@ -182,16 +158,14 @@ const registrations = () => {
         );
     }
 
-    // If a row is selected, show its details in a modal
+    // If a row is selected, show its details in a modal (show all data)
     if (selectedRow) {
         return (
             <div
                 className="p-6 bg-gray-100 overflow-hidden overflow-y-scroll"
                 style={{ height: "calc(100vh - 80px)" }}
             >
-
                 <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} />
-
                 <div className="buttons flex space-x-4 mb-4">
                     {/* Back button */}
                     <button
@@ -226,6 +200,7 @@ const registrations = () => {
                             <InfoItem label="Name" value={selectedRow.Name || "N/A"} />
                             <InfoItem label="D.O.B" value={selectedRow.Dob || "N/A"} />
                             <InfoItem label="Mobile Number" value={selectedRow.Mobileno || "N/A"} />
+                            <InfoItem label="JC Name" value={selectedRow.Jcname || "N/A"} />
                             <InfoItem label="Blood Group" value={selectedRow.Bloodgroup || "N/A"} />
                             <InfoItem label="Education" value={selectedRow.Education || "N/A"} />
                             <InfoItem label="Postal Address" value={selectedRow.Postaladdress || "N/A"} />
@@ -238,8 +213,6 @@ const registrations = () => {
                             <InfoItem label="Occupation Details" value={selectedRow.Occupationdetail || "N/A"} />
                             <InfoItem label="Address" value={selectedRow.Address || "N/A"} />
                             <InfoItem label="Expectations" value={selectedRow.Expectation || "N/A"} />
-                            <InfoItem label="JC Name" value={selectedRow.Jcname || "N/A"} />
-
                         </InfoGrid>
                     </Section>
                 </div>
@@ -265,7 +238,7 @@ const registrations = () => {
                                 </button>
                                 <button
                                     className="px-4 py-2 bg-red-500 text-white rounded"
-                                    onClick={() => rejectForm(selectedRow.Formid, rejectReason)} // Changed Formid to _id
+                                    onClick={() => rejectForm(selectedRow.Formid, rejectReason)}
                                 >
                                     Reject
                                 </button>
@@ -278,7 +251,9 @@ const registrations = () => {
                 {showAcceptPopup && (
                     <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
                         <div className="bg-white p-6 rounded-md shadow-lg w-1/3">
-                            <h3 className="text-lg font-semibold mb-4">Are you sure you want to accept this form?</h3>
+                            <h3 className="text-lg font-semibold mb-4">
+                                Are you sure you want to accept this form?
+                            </h3>
                             <div className="flex space-x-4">
                                 <button
                                     className="px-4 py-2 bg-gray-300 rounded-md"
@@ -300,11 +275,13 @@ const registrations = () => {
         );
     }
 
-    // Default table view
+    // Default table view (show only selected columns)
     return (
-        <div className="bg-gray-50 h-screen p-2 overflow-hidden " style={{ height: "calc(100vh - 80px)" }}>
+        <div className="bg-gray-50 h-screen p-2 overflow-hidden" style={{ height: "calc(100vh - 80px)" }}>
             <div className="flex items-center justify-between ">
-                <h1 className="bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold">Registration Requests</h1>
+                <h1 className="bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold">
+                    Registration Requests
+                </h1>
                 <button
                     className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                     onClick={getData}
@@ -321,9 +298,9 @@ const registrations = () => {
                         <thead className="bg-gray-50">
                         <tr>
                             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">#</th>
-                            {headers.map(header => (
-                                <th key={header} className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                    {header.replace(/_/g, " ")}
+                            {tableColumns.map((col) => (
+                                <th key={col.key} className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                                    {col.label}
                                 </th>
                             ))}
                         </tr>
@@ -336,9 +313,9 @@ const registrations = () => {
                                 onClick={() => openModal(item)}
                             >
                                 <td className="px-4 py-3 text-gray-600">{index + 1}</td>
-                                {headers.map(header => (
-                                    <td key={header} className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                                        {getNestedValue(item, header)}
+                                {tableColumns.map((col) => (
+                                    <td key={col.key} className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                                        {getNestedValue(item, col.key)}
                                     </td>
                                 ))}
                             </tr>
@@ -347,7 +324,6 @@ const registrations = () => {
                     </table>
                 )}
             </div>
-
         </div>
     );
 };

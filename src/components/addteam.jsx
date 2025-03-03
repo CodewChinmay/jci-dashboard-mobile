@@ -5,7 +5,7 @@ import "../App.css";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 
-const Addteam = () => {
+const addteam = () => {
   const [formData, setFormData] = useState({
     name: "",
     post: "",
@@ -36,23 +36,37 @@ const Addteam = () => {
   const [selectedPrefix, setSelectedPrefix] = useState("");
   const [showPrefixDropdown, setShowPrefixDropdown] = useState(false);
   const prefixOptions = ["JC", "HGF", "JFD", "JFM", "JCI Sen."];
+  const togglePrefixDropdown = () => {
+    setShowPrefixDropdown((prev) => !prev);
+  };
 
-  // Ref for prefix dropdown container
+  // Refs for click outside detection
   const prefixRef = useRef(null);
-  // Ref for file input so we can clear it after submission
+  const nameDropdownRef = useRef(null);
+  const designationDropdownRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Close prefix dropdown if click occurs outside
+  // Constant style classes
+  const commonInputClasses =
+      "w-full h-12 px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-indigo-500";
+  const commonDropdownClasses =
+      "w-full h-12 px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm cursor-pointer flex justify-between items-center";
+
+  // Close dropdowns if a click occurs outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (prefixRef.current && !prefixRef.current.contains(event.target)) {
         setShowPrefixDropdown(false);
       }
+      if (nameDropdownRef.current && !nameDropdownRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+      if (designationDropdownRef.current && !designationDropdownRef.current.contains(event.target)) {
+        setShowDesignationSuggestions(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Fetch team data on component load
@@ -65,7 +79,6 @@ const Addteam = () => {
         console.error("Error fetching team data:", error);
       }
     };
-
     fetchData();
   }, []);
 
@@ -79,7 +92,6 @@ const Addteam = () => {
         console.error("Error fetching general members:", error);
       }
     };
-
     fetchGeneralMembers();
   }, []);
 
@@ -93,34 +105,51 @@ const Addteam = () => {
         console.error("Error fetching designations:", error);
       }
     };
-
     fetchDesignations();
   }, []);
 
-  // Toggle the suggestion dropdown for Member Name
+  // When Member Name input gains focus, open the full (sorted) list
+  const handleNameFocus = () => {
+    const sortedAll = [...generalMembers].sort((a, b) => a.Name.localeCompare(b.Name));
+    setFilteredGeneralMembers(sortedAll);
+    setShowSuggestions(true);
+  };
+
+  // When Designation input gains focus, open the full (sorted) list
+  const handlePostFocus = () => {
+    const sortedAll = [...designationList].sort((a, b) =>
+        a.designation.localeCompare(b.designation)
+    );
+    setFilteredDesignations(sortedAll);
+    setShowDesignationSuggestions(true);
+  };
+
+  // Toggle Member Name suggestions via chevron icon
   const toggleSuggestions = () => {
-    if (!showSuggestions && formData.name.trim() === "") {
-      const sortedAll = [...generalMembers].sort((a, b) => a.Name.localeCompare(b.Name));
-      setFilteredGeneralMembers(sortedAll);
-    }
-    setShowSuggestions((prev) => !prev);
+    setShowSuggestions((prev) => {
+      const newVal = !prev;
+      if (newVal) {
+        const sortedAll = [...generalMembers].sort((a, b) => a.Name.localeCompare(b.Name));
+        setFilteredGeneralMembers(sortedAll);
+      }
+      return newVal;
+    });
   };
 
-  // Toggle the suggestion dropdown for Designation
+  // Toggle Designation suggestions via chevron icon
   const toggleDesignationSuggestions = () => {
-    if (!showDesignationSuggestions && formData.post.trim() === "") {
-      const sortedAll = [...designationList].sort((a, b) => a.designation.localeCompare(b.designation));
-      setFilteredDesignations(sortedAll);
-    }
-    setShowDesignationSuggestions((prev) => !prev);
+    setShowDesignationSuggestions((prev) => {
+      const newVal = !prev;
+      if (newVal) {
+        const sortedAll = [...designationList].sort((a, b) =>
+            a.designation.localeCompare(b.designation)
+        );
+        setFilteredDesignations(sortedAll);
+      }
+      return newVal;
+    });
   };
 
-  // Toggle prefix dropdown
-  const togglePrefixDropdown = () => {
-    setShowPrefixDropdown((prev) => !prev);
-  };
-
-  // Update form data and autocomplete suggestions for Member Name and Designation
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -149,7 +178,9 @@ const Addteam = () => {
         setFilteredDesignations(sortedFiltered);
         setShowDesignationSuggestions(true);
       } else {
-        const sortedAll = [...designationList].sort((a, b) => a.designation.localeCompare(b.designation));
+        const sortedAll = [...designationList].sort((a, b) =>
+            a.designation.localeCompare(b.designation)
+        );
         setFilteredDesignations(sortedAll);
         setShowDesignationSuggestions(true);
       }
@@ -158,13 +189,11 @@ const Addteam = () => {
 
   const handleSelectSuggestion = (memberName) => {
     setFormData((prev) => ({ ...prev, name: memberName }));
-    setFilteredGeneralMembers([]);
     setShowSuggestions(false);
   };
 
   const handleSelectDesignation = (designationObj) => {
     setFormData((prev) => ({ ...prev, post: designationObj.designation }));
-    setFilteredDesignations([]);
     setShowDesignationSuggestions(false);
   };
 
@@ -183,65 +212,53 @@ const Addteam = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { name, post, role } = formData;
-
     if (!name || !post || !role || selectedImages.length === 0) {
       toast.error("Please fill in all required fields and upload an image.");
       return;
     }
-
     // Combine selected prefix and name
     const fullName = selectedPrefix ? `${selectedPrefix} ${name}` : name;
-
     const uploadFormData = new FormData();
     selectedImages.forEach((image) => uploadFormData.append("file", image));
-
     setIsSubmitting(true);
-
     try {
       const uploadResponse = await axios.post(
           "https://media.bizonance.in/api/v1/image/upload/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati",
           uploadFormData,
           { headers: { "Content-Type": "multipart/form-data" } }
       );
-
       const { message, uploadedImages } = uploadResponse.data;
-
       if (message === "Images uploaded successfully" && Array.isArray(uploadedImages)) {
         const filenames = uploadedImages.map((image) => image.filename);
-
         const teamData = {
           name: fullName,
           post,
           role,
           imagename: filenames.join(","),
         };
-
         const postResponse = await axios.post(
             "https://jciamravati.in/api/v1/team/uploadteam",
             teamData,
             { headers: { "Content-Type": "application/json" } }
         );
-
         setSubmittedData((prev) => [...prev, postResponse.data.data]);
         toast.success("Data submitted successfully.");
       } else {
         toast.error("Image upload failed. Please check the response structure.");
       }
-
-      // Clear the form after successful submission
+      // Clear the form (preserving team so user doesn't have to reselect)
       setSelectedImages([]);
       setPreviewImages([]);
-      setFormData({
+      setFormData((prev) => ({
+        ...prev,
         name: "",
         post: "",
-        role: "",
         imagename: "",
-      });
+      }));
       setSelectedPrefix("");
       setShowSuggestions(false);
       setShowDesignationSuggestions(false);
       setShowRoleDropdown(false);
-      // Reset file input value
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -256,14 +273,12 @@ const Addteam = () => {
   const handleDelete = async (id, imagename) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this item?");
     if (!confirmDelete) return;
-
     try {
       const filenames = imagename.split(",");
       for (const file of filenames) {
         const link = `https://media.bizonance.in/api/v1/image/download/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati/${file}/?delete=both`;
         await axios.get(link);
       }
-
       await axios.delete(`https://jciamravati.in/api/v1/team/deleteteam/${id}`);
       toast.error("Item and related data deleted successfully!");
       setSubmittedData((prev) => prev.filter((item) => item.id !== id));
@@ -294,17 +309,14 @@ const Addteam = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Select Title
                   </label>
-                  <div
-                      onClick={togglePrefixDropdown}
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm cursor-pointer flex justify-between items-center"
-                  >
+                  <div onClick={togglePrefixDropdown} className={commonDropdownClasses}>
                     <span>{selectedPrefix || "Select Title"}</span>
                     <span className="text-gray-600">
                     {showPrefixDropdown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                   </span>
                   </div>
                   {showPrefixDropdown && (
-                      <ul className="absolute z-10 bg-white border border-gray-300 w-full mt-1 max-h-60 overflow-y-auto">
+                      <ul className="absolute z-10 bg-white border-2 border-gray-300 w-full mt-1 max-h-60 overflow-y-auto transition-all duration-300 ease-in-out">
                         {prefixOptions.map((prefix, index) => (
                             <li
                                 key={index}
@@ -317,9 +329,8 @@ const Addteam = () => {
                       </ul>
                   )}
                 </div>
-
                 {/* Member Name Input with Autocomplete: 9 columns */}
-                <div className="relative col-span-9">
+                <div className="relative col-span-9" ref={nameDropdownRef}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Member Name
                   </label>
@@ -329,10 +340,9 @@ const Addteam = () => {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        onClick={toggleSuggestions}
-                        onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                        onFocus={handleNameFocus}
                         autoComplete="off"
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none"
+                        className={commonInputClasses}
                         required
                     />
                     <span
@@ -343,7 +353,7 @@ const Addteam = () => {
                   </span>
                   </div>
                   {showSuggestions && filteredGeneralMembers.length > 0 && (
-                      <ul className="absolute z-10 bg-white border border-gray-300 w-full max-h-60 overflow-y-auto">
+                      <ul className="absolute z-10 bg-white border-2 border-gray-300 w-full max-h-60 overflow-y-auto transition-all duration-300 ease-in-out">
                         {filteredGeneralMembers.map((member, index) => (
                             <li
                                 key={index}
@@ -357,9 +367,8 @@ const Addteam = () => {
                   )}
                 </div>
               </div>
-
               {/* Designation Input with Autocomplete */}
-              <div className="relative">
+              <div className="relative" ref={designationDropdownRef}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Assign Designation
                 </label>
@@ -369,10 +378,9 @@ const Addteam = () => {
                       name="post"
                       value={formData.post}
                       onChange={handleChange}
-                      onClick={toggleDesignationSuggestions}
-                      onBlur={() => setTimeout(() => setShowDesignationSuggestions(false), 150)}
+                      onFocus={handlePostFocus}
                       autoComplete="off"
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none"
+                      className={commonInputClasses}
                       required
                   />
                   <span
@@ -383,7 +391,7 @@ const Addteam = () => {
                 </span>
                 </div>
                 {showDesignationSuggestions && filteredDesignations.length > 0 && (
-                    <ul className="absolute z-10 bg-white border border-gray-300 w-full max-h-60 overflow-y-auto">
+                    <ul className="absolute z-10 bg-white border-2 border-gray-300 w-full max-h-60 overflow-y-auto transition-all duration-300 ease-in-out">
                       {filteredDesignations.map((designationObj, index) => (
                           <li
                               key={index}
@@ -396,23 +404,19 @@ const Addteam = () => {
                     </ul>
                 )}
               </div>
-
               {/* Custom Role Dropdown */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Select Team
                 </label>
-                <div
-                    onClick={() => setShowRoleDropdown((prev) => !prev)}
-                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm cursor-pointer flex justify-between items-center"
-                >
+                <div onClick={() => setShowRoleDropdown((prev) => !prev)} className={commonDropdownClasses}>
                   <span>{formData.role || "Select Team"}</span>
                   <span className="text-gray-600">
                   {showRoleDropdown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </span>
                 </div>
                 {showRoleDropdown && (
-                    <ul className="absolute z-10 bg-white border border-gray-300 w-full mt-1 max-h-60 overflow-y-auto">
+                    <ul className="absolute z-10 bg-white border-2 border-gray-300 w-full mt-1 max-h-60 overflow-y-auto transition-all duration-300 ease-in-out">
                       {roleOptions.map((roleOption, index) => (
                           <li
                               key={index}
@@ -428,7 +432,6 @@ const Addteam = () => {
                     </ul>
                 )}
               </div>
-
               {/* File Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -438,11 +441,10 @@ const Addteam = () => {
                     ref={fileInputRef}
                     type="file"
                     onChange={handleImageChange}
-                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none"
+                    className={commonInputClasses}
                     required
                 />
               </div>
-
               {/* Preview Images */}
               <div className="flex flex-wrap gap-2">
                 {previewImages.map((image, index) => (
@@ -454,12 +456,11 @@ const Addteam = () => {
                     />
                 ))}
               </div>
-
               {/* Submit Button */}
               <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-2 px-4 bg-cyan-500 text-white font-medium rounded-lg hover:bg-cyan-700"
+                  className="w-full h-10 py-2 px-4 bg-cyan-500 text-white font-medium rounded-lg hover:bg-cyan-700"
               >
                 {isSubmitting ? "Submitting..." : "Submit"}
               </button>
@@ -471,4 +472,4 @@ const Addteam = () => {
   );
 };
 
-export default Addteam;
+export default addteam;

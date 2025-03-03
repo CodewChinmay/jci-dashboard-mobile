@@ -1,108 +1,159 @@
-import React, { useState, useEffect } from "react"
-import axios from "axios"
-import { Trash2, Star, Plus, X, } from "lucide-react"
-
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Trash2, Star, Plus, X } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Workingareas = () => {
   const [formData, setFormData] = useState({
     workingArea: "",
-    date: "",
+    dateDay: "",
+    dateMonth: "",
+    dateYear: "",
     title: "",
     description: "",
     time: "",
     location: "",
     youtubeUrls: [],
-  })
-  const [selectedImages, setSelectedImages] = useState([])
-  const [previewImages, setPreviewImages] = useState([])
-  const [submittedData, setSubmittedData] = useState([])
-  const [selectedWorkingArea, setSelectedWorkingArea] = useState("All")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [selectedOption, setSelectedOption] = useState("")
+  });
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [previewImages, setPreviewImages] = useState([]);
+  const [submittedData, setSubmittedData] = useState([]);
+  const [selectedWorkingArea, setSelectedWorkingArea] = useState("All");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("https://jciamravati.in/api/v1/workingareas/getrecord")
-        setSubmittedData(response.data.data || [])
+        const response = await axios.get(
+            "https://jciamravati.in/api/v1/workingareas/getrecord"
+        );
+        setSubmittedData(response.data.data || []);
       } catch (error) {
-        console.error("Error fetching data:", error)
+        console.error("Error fetching data:", error);
+        toast.error("Error fetching data.");
       }
-    }
+    };
 
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
+
+  // Enhanced helper function to extract YouTube embed URL
+  const getYoutubeEmbedUrl = (url) => {
+    try {
+      // If the URL is already an embed URL, return it directly
+      if (url.includes("youtube.com/embed/")) {
+        return url;
+      }
+      const parsedUrl = new URL(url);
+      let videoId = "";
+
+      if (parsedUrl.hostname === "youtu.be") {
+        videoId = parsedUrl.pathname.slice(1);
+      } else if (parsedUrl.hostname.includes("youtube.com")) {
+        // If it's already in embed format, just return it.
+        if (parsedUrl.pathname.startsWith("/embed/")) {
+          return url;
+        }
+        // Support YouTube Shorts
+        if (parsedUrl.pathname.startsWith("/shorts/")) {
+          const parts = parsedUrl.pathname.split("/");
+          videoId = parts[2];
+        } else if (parsedUrl.pathname.startsWith("/v/")) {
+          const parts = parsedUrl.pathname.split("/");
+          videoId = parts[2];
+        } else {
+          videoId = parsedUrl.searchParams.get("v");
+        }
+      }
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+    } catch (error) {
+      // Invalid URL
+      return null;
+    }
+    return null;
+  };
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === "selectedWorkingArea") {
-      setSelectedWorkingArea(value === "true" ? true : value === "false" ? false : value)
+      setSelectedWorkingArea(
+          value === "true" ? true : value === "false" ? false : value
+      );
     } else {
-      setSelectedOption(value)
+      setSelectedOption(value);
     }
-  }
+  };
 
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files)
-    setSelectedImages(files)
+    const files = Array.from(e.target.files);
+    setSelectedImages(files);
 
-    const imagePreviews = files.map((file) => URL.createObjectURL(file))
-    setPreviewImages(imagePreviews)
-  }
+    const imagePreviews = files.map((file) => URL.createObjectURL(file));
+    setPreviewImages(imagePreviews);
+  };
 
   const handleYoutubeUrlChange = (index, value) => {
-    const updatedUrls = [...formData.youtubeUrls]
-    updatedUrls[index] = value
-    setFormData((prev) => ({ ...prev, youtubeUrls: updatedUrls }))
-  }
+    const updatedUrls = [...formData.youtubeUrls];
+    updatedUrls[index] = value;
+    setFormData((prev) => ({ ...prev, youtubeUrls: updatedUrls }));
+  };
 
   const addYoutubeUrl = () => {
-    setFormData((prev) => ({ ...prev, youtubeUrls: [...prev.youtubeUrls, ""] }))
-  }
+    setFormData((prev) => ({ ...prev, youtubeUrls: [...prev.youtubeUrls, ""] }));
+  };
 
   const removeYoutubeUrl = (index) => {
     setFormData((prev) => ({
       ...prev,
       youtubeUrls: prev.youtubeUrls.filter((_, i) => i !== index),
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    const { workingArea, date, title, description, time, location, youtubeUrls } = formData
+    e.preventDefault();
+    const { workingArea, dateDay, dateMonth, dateYear, title, description, time, location, youtubeUrls } = formData;
 
     if (selectedImages.length === 0) {
-      alert("Please select at least one image before submitting.")
-      return
+      toast.error("Please select at least one image before submitting.");
+      return;
     }
 
-    if (!workingArea || !date || !title || !description || !time) {
-      alert("Please fill in all required fields.")
-      return
+    if (!workingArea || !dateDay || !dateMonth || !dateYear || !title || !description || !time) {
+      toast.error("Please fill in all required fields.");
+      return;
     }
 
-    const uploadFormData = new FormData()
-    selectedImages.forEach((image) => uploadFormData.append("file", image))
+    // Combine day, month, and year into a full date string (YYYY-MM-DD)
+    const day = dateDay.toString().padStart(2, "0");
+    const month = dateMonth.toString().padStart(2, "0");
+    const fullDate = `${dateYear}-${month}-${day}`;
 
-    setIsSubmitting(true)
+    const uploadFormData = new FormData();
+    selectedImages.forEach((image) => uploadFormData.append("file", image));
+
+    setIsSubmitting(true);
 
     try {
       const uploadResponse = await axios.post(
           "https://media.bizonance.in/api/v1/image/upload/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati",
           uploadFormData,
-          { headers: { "Content-Type": "multipart/form-data" } },
-      )
+          { headers: { "Content-Type": "multipart/form-data" } }
+      );
 
-      const { message, uploadedImages } = uploadResponse.data
+      const { message, uploadedImages } = uploadResponse.data;
 
       if (message === "Images uploaded successfully" && Array.isArray(uploadedImages)) {
-        const filenames = uploadedImages.map((image) => image.filename)
+        const filenames = uploadedImages.map((image) => image.filename);
 
         const workingAreaData = {
           workingarea: workingArea,
-          date,
+          date: fullDate,
           title,
           description,
           imagename: filenames.join(","),
@@ -110,103 +161,99 @@ const Workingareas = () => {
           location,
           youtubeUrls: youtubeUrls.filter((url) => url.trim() !== ""),
           highlighted: false,
-        }
+        };
 
-        const postResponse = await axios.post("https://jciamravati.in/api/v1/workingareas/upload", workingAreaData, {
-          headers: { "Content-Type": "application/json" },
-        })
+        const postResponse = await axios.post(
+            "https://jciamravati.in/api/v1/workingareas/upload",
+            workingAreaData,
+            { headers: { "Content-Type": "application/json" } }
+        );
 
-        setSubmittedData((prev) => [...prev, postResponse.data.data])
-        alert("Data submitted successfully.")
-        clearForm()
+        setSubmittedData((prev) => [...prev, postResponse.data.data]);
+        toast.success("Data submitted successfully.");
+        clearForm();
       } else {
-        alert("Image upload failed. Please check the response structure.")
+        toast.error("Image upload failed. Please check the response structure.");
       }
     } catch (error) {
-      console.error("Error uploading images and data:", error.response?.data || error.message)
-      alert("Failed to upload the images and data. Please try again.")
+      console.error("Error uploading images and data:", error.response?.data || error.message);
+      toast.error("Failed to upload the images and data. Please try again.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleDelete = async (id, imagename) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this item?")
-    if (!confirmDelete) return
+    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+    if (!confirmDelete) return;
 
     try {
-      const filenames = imagename.split(",")
+      const filenames = imagename.split(",");
       for (const file of filenames) {
-        const link = `https://media.bizonance.in/api/v1/image/download/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati/${file}/?delete=both`
-        const response = await axios.get(link)
+        const link = `https://media.bizonance.in/api/v1/image/download/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati/${file}/?delete=both`;
+        const response = await axios.get(link);
 
         if (response.status !== 200) {
-          console.error(`Failed to delete image: ${file}`)
-          throw new Error(`Image deletion failed for ${file}`)
+          console.error(`Failed to delete image: ${file}`);
+          throw new Error(`Image deletion failed for ${file}`);
         }
       }
 
-      await axios.delete(`https://jciamravati.in/api/v1/workingareas/deleterecord/${id}`)
-      alert("Item and related data deleted successfully!")
-
-      setSubmittedData((prev) => prev.filter((item) => item.id !== id))
+      await axios.delete(`https://jciamravati.in/api/v1/workingareas/deleterecord/${id}`);
+      toast.success("Item and related data deleted successfully!");
+      setSubmittedData((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
-      console.error("Error deleting item:", error)
-      alert("Failed to delete the item. Please try again.")
+      console.error("Error deleting item:", error);
+      toast.error("Failed to delete the item. Please try again.");
     }
-  }
+  };
 
   const handleHighlight = async (id) => {
-    const currentItem = submittedData.find((data) => data.id === id)
-    const newHighlightStatus = !currentItem.highlighted
+    const currentItem = submittedData.find((data) => data.id === id);
+    const newHighlightStatus = !currentItem.highlighted;
 
     try {
       const response = await axios.patch(
           `https://jciamravati.in/api/v1/workingareas/highlight/${id}`,
           { highlighted: newHighlightStatus },
-          { headers: { "Content-Type": "application/json" } },
-      )
+          { headers: { "Content-Type": "application/json" } }
+      );
 
       if (response.status === 200) {
         setSubmittedData((prev) =>
-            prev.map((item) => (item.id === id ? { ...item, highlighted: newHighlightStatus } : item)),
-        )
-        alert(response.data.message)
+            prev.map((item) =>
+                item.id === id ? { ...item, highlighted: newHighlightStatus } : item
+            )
+        );
+        toast.success(response.data.message);
       }
     } catch (error) {
-      console.error("Error updating highlighted status:", error)
-      alert("Failed to update highlighted status.")
+      console.error("Error updating highlighted status:", error);
+      toast.error("Failed to update highlighted status.");
     }
-  }
-
-  
+  };
 
   const clearForm = () => {
     setFormData({
       workingArea: "",
-      date: "",
+      dateDay: "",
+      dateMonth: "",
+      dateYear: "",
       time: "",
       title: "",
       location: "",
       description: "",
       youtubeUrls: [],
-    })
-    setSelectedImages([])
-    setPreviewImages([])
-    document.querySelector('input[type="file"]').value = ""
-  }
+    });
+    setSelectedImages([]);
+    setPreviewImages([]);
+    document.querySelector('input[type="file"]').value = "";
+  };
 
   return (
       <div className="p-4 overflow-hidden overflow-y-scroll" style={{ height: "calc(100vh - 140px)" }}>
-        {/* <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">Working Areas</h1> */}
-        <div className="max-w-7xl mx-auto ">
-
-          {/*<div className="buttons flex">*/}
-          {/*  <h1 className="text-1xl bg-gray-500 rounded-t-lg a w-[120px]">Team</h1>*/}
-          {/*  <h1 className="text-1xl bg-gray-300 rounded-tr-lg">Add Team</h1>*/}
-          {/*</div>*/}
+        <div className="max-w-7xl mx-auto">
           <div className="bg-white p-4">
-            {/* <h2 className="text-2xl font-semibold mb-6 text-gray-700">Add New Activity</h2> */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-2">
@@ -222,7 +269,9 @@ const Workingareas = () => {
                     <option value="Management">Management</option>
                     <option value="Business">Business</option>
                     <option value="Community">Community</option>
-                    <option value="International Growth and Development">International Growth and Development</option>
+                    <option value="International Growth and Development">
+                      International Growth and Development
+                    </option>
                     <option value="Training">Training</option>
                   </select>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Activity Title</label>
@@ -249,14 +298,53 @@ const Workingareas = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Activity Date</label>
-                      <input
-                          type="date"
-                          name="date"
-                          value={formData.date}
-                          onChange={handleChange}
-                          className="text-gray-400 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                          required
-                      />
+                      <div className="flex space-x-2">
+                        <select
+                            name="dateDay"
+                            value={formData.dateDay}
+                            onChange={handleChange}
+                            className="text-gray-400 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                            required
+                        >
+                          <option value="">Day</option>
+                          {Array.from({ length: 31 }, (_, i) => (
+                              <option key={i + 1} value={i + 1}>
+                                {i + 1}
+                              </option>
+                          ))}
+                        </select>
+                        <select
+                            name="dateMonth"
+                            value={formData.dateMonth}
+                            onChange={handleChange}
+                            className="text-gray-400 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                            required
+                        >
+                          <option value="">Month</option>
+                          {Array.from({ length: 12 }, (_, i) => (
+                              <option key={i + 1} value={i + 1}>
+                                {i + 1}
+                              </option>
+                          ))}
+                        </select>
+                        <select
+                            name="dateYear"
+                            value={formData.dateYear}
+                            onChange={handleChange}
+                            className="text-gray-400 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                            required
+                        >
+                          <option value="">Year</option>
+                          {Array.from({ length: new Date().getFullYear() - 2020 + 1 }, (_, i) => {
+                            const year = 2020 + i;
+                            return (
+                                <option key={year} value={year}>
+                                  {year}
+                                </option>
+                            );
+                          })}
+                        </select>
+                      </div>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Activity Time</label>
@@ -295,24 +383,44 @@ const Workingareas = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Video URLs</label>
-                    {formData.youtubeUrls.map((url, index) => (
-                        <div key={index} className="flex items-center mb-2">
-                          <input
-                              type="url"
-                              value={url}
-                              onChange={(e) => handleYoutubeUrlChange(index, e.target.value)}
-                              className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                              placeholder="Enter YouTube URL"
-                          />
-                          <button
-                              type="button"
-                              onClick={() => removeYoutubeUrl(index)}
-                              className="ml-2 p-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-                    ))}
+                    {formData.youtubeUrls.map((url, index) => {
+                      const embedUrl = getYoutubeEmbedUrl(url);
+                      return (
+                          <div key={index} className="flex flex-col mb-4">
+                            <div className="flex items-center mb-2">
+                              <input
+                                  type="url"
+                                  value={url}
+                                  onChange={(e) => handleYoutubeUrlChange(index, e.target.value)}
+                                  className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                                  placeholder="Enter YouTube URL"
+                              />
+                              <button
+                                  type="button"
+                                  onClick={() => removeYoutubeUrl(index)}
+                                  className="ml-2 p-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+                            {embedUrl && (
+                                <div
+                                    className="relative"
+                                    style={{ paddingBottom: "56.25%", height: 0, overflow: "hidden" }}
+                                >
+                                  <iframe
+                                      src={embedUrl}
+                                      title={`YouTube video ${index}`}
+                                      frameBorder="0"
+                                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                      allowFullScreen
+                                      className="absolute top-0 left-0 w-full h-full"
+                                  ></iframe>
+                                </div>
+                            )}
+                          </div>
+                      );
+                    })}
                     <button
                         type="button"
                         onClick={addYoutubeUrl}
@@ -324,8 +432,6 @@ const Workingareas = () => {
                   </div>
                 </div>
                 <div>
-
-
                   <label className="block text-sm font-medium text-gray-700 mb-1">Activity Description</label>
                   <textarea
                       name="description"
@@ -336,12 +442,8 @@ const Workingareas = () => {
                       rows="17"
                       required
                   ></textarea>
-
                 </div>
-
               </div>
-
-
               <div>
                 <button
                     type="submit"
@@ -353,11 +455,10 @@ const Workingareas = () => {
               </div>
             </form>
           </div>
-
         </div>
+        <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} />
       </div>
-  )
-}
+  );
+};
 
-export default Workingareas
-
+export default Workingareas;

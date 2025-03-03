@@ -6,9 +6,18 @@ import "./pdf.css";
 
 const Formregistrations = () => {
   const [data, setData] = useState([]);
-  const [headers, setHeaders] = useState([]);
-  const [selectedRow, setSelectedRow] = useState(null); // Store selected row for detailed view
-  const [readRows, setReadRows] = useState(new Set()); // Track "read" rows
+  const [headers, setHeaders] = useState([]); // still used for dynamic extraction if needed elsewhere
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [readRows, setReadRows] = useState(new Set());
+
+  // Fixed table columns for table view
+  const tableColumns = [
+    { label: "Name", key: "Name" },
+    { label: "D.O.B", key: "Dob" },
+    { label : "Occupation", key: "Occupation" },
+    { label: "Mobile Number", key: "Mobileno" },
+    { label: "JC Name", key: "Jcname" },
+  ];
 
   const downloadPDF = () => {
     if (!selectedRow || !selectedRow.Name) {
@@ -17,7 +26,7 @@ const Formregistrations = () => {
     }
 
     const element = document.getElementById("pdf-content");
-    const fileName = `${selectedRow.Name.replace(/\s+/g, "_")}_form.pdf`; // Replace spaces with underscores for the file name.
+    const fileName = `${selectedRow.Name.replace(/\s+/g, "_")}_form.pdf`;
 
     html2canvas(element, { scale: 3 }).then((canvas) => {
       const imgData = canvas.toDataURL("image/png");
@@ -27,7 +36,7 @@ const Formregistrations = () => {
       const pdfHeight = 297; // A4 height in mm
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
-      const imgHeight = (canvasHeight * pdfWidth) / canvasWidth; // Scale the height proportionally
+      const imgHeight = (canvasHeight * pdfWidth) / canvasWidth;
 
       let heightLeft = imgHeight;
       let position = 0;
@@ -44,7 +53,7 @@ const Formregistrations = () => {
         heightLeft -= pdfHeight;
       }
 
-      pdf.save(fileName); // Save the file with the dynamic name
+      pdf.save(fileName);
     });
   };
 
@@ -52,8 +61,6 @@ const Formregistrations = () => {
   const getData = async (type = "all") => {
     try {
       let url = "https://jciamravati.in/api/v1/membership/generalmembers";
-
-
       const response = await fetch(url);
       const fetchedData = await response.json();
       setData(fetchedData);
@@ -90,9 +97,6 @@ const Formregistrations = () => {
     }
   };
 
-
-
-
   useEffect(() => {
     getData();
   }, []);
@@ -113,7 +117,7 @@ const Formregistrations = () => {
     setSelectedRow(null);
   };
 
-  // Table View
+  // Table view when no row is selected
   if (!data || data.length === 0) {
     return <div className="text-center text-gray-500">No data available</div>;
   }
@@ -165,12 +169,24 @@ const Formregistrations = () => {
             <section className="mb-8">
               <h4 className="text-xl font-bold text-cyan-600 mb-4">Personal Information</h4>
               <div className="grid grid-cols-10 gap-4">
-                <p className="font-medium col-span-3">Name: <span className="underline">{selectedRow.Name || "N/A"}</span></p>
-                <p className="font-medium col-span-3">D.O.B: <span className="underline">{selectedRow.Dob || "N/A"}</span></p>
-                <p className="font-medium col-span-4">Mobile Number: <span className="underline">{selectedRow.Mobileno || "N/A"}</span></p>
-                <p className="font-medium col-span-2">Blood Group: <span className="underline">{selectedRow.Bloodgroup || "N/A"}</span></p>
-                <p className="font-medium col-span-3">Education: <span className="underline">{selectedRow.Education || "N/A"}</span></p>
-                <p className="font-medium col-span-5">Postal Address: <span className="underline">{selectedRow.Postaladdress || "N/A"}</span></p>
+                <p className="font-medium col-span-3">
+                  Name: <span className="underline">{selectedRow.Name || "N/A"}</span>
+                </p>
+                <p className="font-medium col-span-3">
+                  D.O.B: <span className="underline">{selectedRow.Dob || "N/A"}</span>
+                </p>
+                <p className="font-medium col-span-4">
+                  Mobile Number: <span className="underline">{selectedRow.Mobileno || "N/A"}</span>
+                </p>
+                <p className="font-medium col-span-2">
+                  Blood Group: <span className="underline">{selectedRow.Bloodgroup || "N/A"}</span>
+                </p>
+                <p className="font-medium col-span-3">
+                  Education: <span className="underline">{selectedRow.Education || "N/A"}</span>
+                </p>
+                <p className="font-medium col-span-5">
+                  Postal Address: <span className="underline">{selectedRow.Postaladdress || "N/A"}</span>
+                </p>
               </div>
             </section>
 
@@ -178,11 +194,21 @@ const Formregistrations = () => {
             <section className="mb-8">
               <h4 className="text-xl font-bold text-cyan-600 mb-4">Family Details</h4>
               <div className="grid grid-cols-10 gap-4">
-                <p className="font-medium col-span-3">Married Status: <span className="font-normal">{selectedRow.Mstatus || "N/A"}</span></p>
-                <p className="font-medium col-span-4">Wife's Name: <span className="font-normal">{selectedRow.Wifename || "N/A"}</span></p>
-                <p className="font-medium col-span-3">Wife's D.O.B: <span className="font-normal">{selectedRow.Wdob || "N/A"}</span></p>
-                <p className="font-medium col-span-5">Wife's Mobile Number: <span className="font-normal">{selectedRow.Wmobileno || "N/A"}</span></p>
-                <p className="font-medium col-span-5">Child's Name: <span className="font-normal">{selectedRow.Childname || "N/A"}</span></p>
+                <p className="font-medium col-span-3">
+                  Married Status: <span className="font-normal">{selectedRow.Mstatus || "N/A"}</span>
+                </p>
+                <p className="font-medium col-span-4">
+                  Wife's Name: <span className="font-normal">{selectedRow.Wifename || "N/A"}</span>
+                </p>
+                <p className="font-medium col-span-3">
+                  Wife's D.O.B: <span className="font-normal">{selectedRow.Wdob || "N/A"}</span>
+                </p>
+                <p className="font-medium col-span-5">
+                  Wife's Mobile Number: <span className="font-normal">{selectedRow.Wmobileno || "N/A"}</span>
+                </p>
+                <p className="font-medium col-span-5">
+                  Child's Name: <span className="font-normal">{selectedRow.Childname || "N/A"}</span>
+                </p>
               </div>
             </section>
 
@@ -190,8 +216,12 @@ const Formregistrations = () => {
             <section className="mb-8">
               <h4 className="text-xl font-bold text-cyan-600 mb-4">Professional Information</h4>
               <div className="grid grid-cols-3 gap-4">
-                <p className="font-medium">Occupation: <span className="font-normal">{selectedRow.Occupation || "N/A"}</span></p>
-                <p className="font-medium">Occupation Details: <span className="font-normal">{selectedRow.Occupationdetail || "N/A"}</span></p>
+                <p className="font-medium">
+                  Occupation: <span className="font-normal">{selectedRow.Occupation || "N/A"}</span>
+                </p>
+                <p className="font-medium">
+                  Occupation Details: <span className="font-normal">{selectedRow.Occupationdetail || "N/A"}</span>
+                </p>
               </div>
             </section>
 
@@ -199,9 +229,15 @@ const Formregistrations = () => {
             <section className="mb-8">
               <h4 className="text-xl font-bold text-cyan-600 mb-4">Additional Information</h4>
               <div className="grid grid-cols-10 gap-4">
-                <p className="font-medium col-span-5">Address: <span className="font-normal">{selectedRow.Address || "N/A"}</span></p>
-                <p className="font-medium col-span-5">Expectations: <span className="font-normal">{selectedRow.Expectation || "N/A"}</span></p>
-                <p className="font-medium">JC Name: <span className="font-normal">{selectedRow.Jcname || "N/A"}</span></p>
+                <p className="font-medium col-span-5">
+                  Address: <span className="font-normal">{selectedRow.Address || "N/A"}</span>
+                </p>
+                <p className="font-medium col-span-5">
+                  Expectations: <span className="font-normal">{selectedRow.Expectation || "N/A"}</span>
+                </p>
+                <p className="font-medium">
+                  JC Name: <span className="font-normal">{selectedRow.Jcname || "N/A"}</span>
+                </p>
               </div>
             </section>
 
@@ -213,16 +249,19 @@ const Formregistrations = () => {
             </footer>
           </div>
         </div>
-
-
-
     );
   }
 
+  // Main table view with fixed columns
   return (
-      <div className=" p-2 bg-gray-50 overflow-hidden scrollbar-custom overflow-y-scroll" style={{ height: "calc(100vh - 80px)" }}>
+      <div
+          className="p-2 bg-gray-50 overflow-hidden scrollbar-custom overflow-y-scroll"
+          style={{ height: "calc(100vh - 80px)" }}
+      >
         <div className="flex items-center justify-between">
-          <h1 className="bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold ">General Members</h1>
+          <h1 className="bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold">
+            General Members
+          </h1>
           <button
               className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
               onClick={getData}
@@ -236,9 +275,9 @@ const Formregistrations = () => {
             <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">#</th>
-              {headers.map(header => (
-                  <th key={header} className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                    {header.replace(/_/g, " ")}
+              {tableColumns.map((col) => (
+                  <th key={col.key} className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    {col.label}
                   </th>
               ))}
             </tr>
@@ -247,15 +286,13 @@ const Formregistrations = () => {
             {data.map((item, index) => (
                 <tr
                     key={index}
-                    className={`hover:bg-gray-50 cursor-pointer ${
-                        item.highlighted ? "bg-green-50" : ""
-                    }`}
+                    className={`hover:bg-gray-50 cursor-pointer ${item.highlighted ? "bg-green-50" : ""}`}
                     onClick={() => openModal(item)}
                 >
                   <td className="px-4 py-3 text-gray-600">{index + 1}</td>
-                  {headers.map(header => (
-                      <td key={header} className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                        {getNestedValue(item, header)}
+                  {tableColumns.map((col) => (
+                      <td key={col.key} className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                        {getNestedValue(item, col.key)}
                       </td>
                   ))}
                 </tr>
@@ -268,4 +305,3 @@ const Formregistrations = () => {
 };
 
 export default Formregistrations;
-

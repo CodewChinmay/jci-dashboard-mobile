@@ -43,19 +43,20 @@ export default function Home({ setActiveContent }) {
                 {stats.map((stat, index) => (
                     <div
                         key={index}
-                        className="text-cyan-600 p-6 rounded-md shadow-xl transition-shadow duration-200 flex justify-between items-center cursor-pointer"
+                        className="text-cyan-600 p-6 rounded-md shadow-[0_0_30px_rgba(0,0,0,0.2)] transition-shadow duration-200 flex justify-between items-center cursor-pointer"
                         onClick={() => {
-                            setActiveContent(stat.title); // This will update activeContent in Sidebar
+                            setActiveContent(stat.title);
                             if (stat.redirectUrl) {
                                 window.location.href = stat.redirectUrl;
                             }
                         }}
                     >
-                        <div className="flex items-center space-x-3">
+
+                    <div className="flex items-center space-x-3">
                             <div className={`w-12 h-12 ${stat.bg} rounded-xl flex items-center justify-center`}>
                                 {stat.icon}
                             </div>
-                            <h3 className="text-lg font-medium text-black ">{stat.title}</h3>
+                            <h3 className="text-lg font-medium text-black white">{stat.title}</h3>
                         </div>
                         {stat.redirectUrl ? null : (
                             <p className="text-3xl font-bold text-black">{stat.count}</p>

@@ -1,7 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Users, UserRoundX, UserRoundCheck, HomeIcon, Briefcase, ImagePlus, PencilRuler, UserRoundPlus  } from "lucide-react"
+import { Users, UserRoundX, UserRoundCheck, HomeIcon, Briefcase, ImagePlus, PencilRuler, UserRoundPlus, Eye, CircleHelp   } from "lucide-react"
+
+import { Images, User } from "pixora-icons"
+
+
 import Formregistrations from "./formregistrations.jsx"
 import Addmember from "./addmember.jsx"
 import Registrations from "./registrations.jsx"
@@ -12,16 +16,23 @@ import Workingtab from "./workingtab.jsx"
 import Teamtab from "./teamtab.jsx"
 import Home from "./home.jsx"
 
+import siteframe from "./siteframe.jsx"
+import Siteframe from "./siteframe.jsx";
+
+import Help from "./Helpcenter.jsx"
+
 const sidebarItems = [
   { title: "Home", Content: Home, Icon: HomeIcon },
-  { title: "Registration Requests", Content: Registrations, Icon: Users },
+  { title: "Registration Requests", Content: Registrations, Icon: User },
   { title: "Add Member", Content: Addmember, Icon: UserRoundPlus  },
   { title: "General Members", Icon: UserRoundCheck, Content: Formregistrations },
   { title: "Rejected Members", Icon: UserRoundX, Content: RejectedForms },
   { title: "Board Member", Icon: Briefcase, Content: Teamtab },
-  { title: "Gallery", Icon: ImagePlus, Content: Gallery },
-  { title: "Carousel", Icon: ImagePlus, Content: Carousel },
+  { title: "Gallery", Icon: Images, Content: Gallery },
+  { title: "Sliding Images", Icon: Images, Content: Carousel },
   { title: "Working Areas", Icon: PencilRuler, Content: Workingtab },
+  { title: "Site Preview", Icon: Eye, Content: Siteframe  },
+  { title: "Help Center", Icon: CircleHelp , Content: Help },
 ]
 
 function Sidebar({ isOpen: propIsOpen }) {
