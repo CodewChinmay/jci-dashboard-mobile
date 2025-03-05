@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { PlusCircle, Trash2, X } from "lucide-react";
+import { PlusCircle, Trash2, X, Star } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../App.css";
@@ -59,19 +59,32 @@ const Gallery = () => {
     try {
       const response = await axios.get("https://jciamravati.in/api/v1/gallery/images");
       console.log("Gallery API Response:", response.data);
-      if (!response.data || !Array.isArray(response.data.imageNames)) {
-        console.error("Invalid response format:", response.data);
-        setImages([]);
-        return;
-      }
       const baseUrl =
           "https://media.bizonance.in/api/v1/image/download/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati";
-      const mappedImages = response.data.imageNames.map((name) => ({
-        url: `${baseUrl}/${name}?q=50%&&f=webp`,
-        id: name,
-        name: name,
-      }));
-      setImages(mappedImages);
+
+      // Check for preferred format first (response.data.images)
+      if (response.data.images && Array.isArray(response.data.images)) {
+        const mappedImages = response.data.images.map((img) => ({
+          url: `${baseUrl}/${img.name}?q=50%&&f=webp`,
+          id: img.id,
+          name: img.name,
+          highlighted: img.highlighted,
+        }));
+        setImages(mappedImages);
+      }
+      // Otherwise, check for alternative format (imageNames array)
+      else if (response.data.imageNames && Array.isArray(response.data.imageNames)) {
+        const mappedImages = response.data.imageNames.map((name, index) => ({
+          url: `${baseUrl}/${name}?q=50%&&f=webp`,
+          id: index, // fallback id
+          name: name,
+          highlighted: false, // default to false since no info provided
+        }));
+        setImages(mappedImages);
+      } else {
+        console.error("Invalid response format:", response.data);
+        setImages([]);
+      }
     } catch (error) {
       console.error("Error fetching gallery images:", error.message);
       setImages([]);
@@ -97,17 +110,31 @@ const Gallery = () => {
     }
   };
 
+  // Toggle highlight status of an image
+  const toggleHighlight = async (image) => {
+    try {
+      const newHighlighted = !image.highlighted;
+      const response = await axios.patch(
+          `https://jciamravati.in/api/v1/gallery/highlight/${image.id}`,
+          { highlighted: newHighlighted }
+      );
+      toast.success(response.data.message);
+      fetchImages();
+    } catch (error) {
+      console.error("Error updating highlight status:", error);
+      toast.error("Failed to update highlight status.");
+    }
+  };
+
   // Handle image selection for upload
   const handleImageChange = (e) => {
     const files = e.target.files;
     const imagesArray = Array.from(files);
-    // Validate: if more than 5 images are selected, show validation modal
     if (imagesArray.length > 5) {
       setShowValidationModal(true);
       return;
     }
     setSelectedImages(imagesArray);
-    // Create preview URL for each selected image
     setPreviewImages(imagesArray.map((file) => URL.createObjectURL(file)));
   };
 
@@ -186,13 +213,9 @@ const Gallery = () => {
   return (
       <div className="p-4 overflow-hidden overflow-y-scroll" style={{ height: "calc(100vh - 80px)" }}>
         <h1 className="text-3xl font-bold text-gray-700 mb-6 text-center">Gallery Images</h1>
-
-        {/* Note for maximum allowed images */}
         <p className="text-sm text-gray-500 text-center mb-4">
           Note: Only 5 images can be submitted per submit.
         </p>
-
-        {/* Flex container: Input Section on the left and Preview Section on the right (on md screens) */}
         <div className="flex flex-col md:flex-row gap-8">
           {/* Input Section */}
           <div className="flex-1">
@@ -229,8 +252,6 @@ const Gallery = () => {
                   Clear Image
                 </h3>
               </div>
-
-              {/* Submit Button (full width) */}
               <button
                   type="submit"
                   disabled={isSubmitting}
@@ -240,8 +261,7 @@ const Gallery = () => {
               </button>
             </form>
           </div>
-
-          {/* Preview Section: Displayed only when images are selected */}
+          {/* Preview Section */}
           {previewImages.length > 0 && (
               <div className="flex-1">
                 <h2 className="text-xl font-semibold text-gray-700 mb-2">Selected Previews</h2>
@@ -267,7 +287,6 @@ const Gallery = () => {
               </div>
           )}
         </div>
-
         {/* Gallery Section */}
         <div className="mt-10">
           <div className="grid grid-cols-3 gap-6">
@@ -284,6 +303,19 @@ const Gallery = () => {
                           onClick={() => handleOpenLightbox(image.url)}
                       />
                       <div className="absolute top-2 right-2 flex gap-2">
+                        {/* Star button to toggle highlight */}
+                        <button
+                            type="button"
+                            onClick={() => toggleHighlight(image)}
+                            className={`p-2 rounded-full shadow hover:bg-gray-100 ${
+                                image.highlighted ? "bg-yellow-500" : "bg-white"
+                            }`}
+                        >
+                          <Star className={`w-5 h-5 ${
+                              image.highlighted ? "text-white" : "text-gray-800"
+                          }`} />
+                        </button>
+                        {/* Delete button */}
                         <button
                             type="button"
                             className="bg-white p-2 rounded-full shadow hover:bg-gray-100"
@@ -299,7 +331,6 @@ const Gallery = () => {
             )}
           </div>
         </div>
-
         {/* Lightbox */}
         {lightboxImage && (
             <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
@@ -313,7 +344,6 @@ const Gallery = () => {
               <img src={lightboxImage} alt="Lightbox" className="max-w-4xl max-h-full" />
             </div>
         )}
-
         {/* Confirmation Modal */}
         {confirmModal && (
             <ConfirmModal
@@ -322,15 +352,13 @@ const Gallery = () => {
                 onCancel={confirmModal.onCancel}
             />
         )}
-
-        {/* Validation Modal for exceeding 5 images */}
+        {/* Validation Modal */}
         {showValidationModal && (
             <AlertModal
                 message="Only 5 images can be submitted per submit."
                 onClose={() => setShowValidationModal(false)}
             />
         )}
-
         <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} />
       </div>
   );

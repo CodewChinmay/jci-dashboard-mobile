@@ -10,11 +10,13 @@ import Formregistrations from "./formregistrations.jsx"
 import Addmember from "./addmember.jsx"
 import Registrations from "./registrations.jsx"
 import RejectedForms from "./Rejectedmembers.jsx"
-import Gallery from "./gallery.jsx"
+import Gallery from "./gallerytab.jsx"
 import Carousel from "./carousel.jsx"
 import Workingtab from "./workingtab.jsx"
 import Teamtab from "./teamtab.jsx"
 import Home from "./home.jsx"
+
+
 
 import siteframe from "./siteframe.jsx"
 import Siteframe from "./siteframe.jsx";

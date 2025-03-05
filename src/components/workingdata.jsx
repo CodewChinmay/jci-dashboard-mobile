@@ -5,7 +5,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Custom Confirmation Modal Component
-// eslint-disable-next-line react/prop-types
 const ConfirmModal = ({ message, onConfirm, onCancel }) => (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-6 rounded shadow-lg w-80">
@@ -82,7 +81,7 @@ const Workingdata = () => {
     }
   };
 
-  const handleDeleteClick = (id, imagename) => {
+  const handleDeleteClick = (id) => {
     setConfirmModal({
       message: "Are you sure you want to delete this event?",
       onConfirm: () => {
@@ -217,16 +216,11 @@ const Workingdata = () => {
               : submittedData.filter((data) => data.workingarea === selectedWorkingArea);
 
   return (
-      <div
-          className="p-6 bg-gray-50 overflow-hidden"
-          style={{ height: "calc(100vh - 140px)" }}
-      >
+      <div className="p-6 bg-gray-50 overflow-hidden" style={{ height: "calc(100vh - 140px)" }}>
         <div className="max-w-7xl mx-auto">
           <div className="bg-white p-4">
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filter by:
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by:</label>
               <select
                   value={selectedWorkingArea}
                   onChange={(e) => setSelectedWorkingArea(e.target.value)}
@@ -237,9 +231,7 @@ const Workingdata = () => {
                 <option value="Management">Management</option>
                 <option value="Business">Business</option>
                 <option value="Community">Community</option>
-                <option value="International Growth and Development">
-                  International Growth
-                </option>
+                <option value="International Growth and Development">International Growth</option>
                 <option value="Training">Training</option>
               </select>
             </div>
@@ -258,11 +250,7 @@ const Workingdata = () => {
                 }
 
                 return (
-                    <div
-                        key={data.id}
-                        className="flex flex-col border border-gray-300 bg-white rounded-lg shadow-sm"
-                    >
-                      {/* Display the event image (if available) on the upper side of the card */}
+                    <div key={data.id} className="flex flex-col border border-gray-300 bg-white rounded-lg shadow-sm">
                       {firstImage && (
                           <img
                               src={`https://media.bizonance.in/api/v1/image/download/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati/${firstImage}`}
@@ -271,9 +259,7 @@ const Workingdata = () => {
                           />
                       )}
                       <div className="p-4 flex flex-col flex-grow space-y-1">
-                        <p className="text-sm font-bold text-gray-600 whitespace-nowrap">
-                           {data.workingarea}
-                        </p>
+                        <p className="text-sm font-bold text-gray-600 whitespace-nowrap">{data.workingarea}</p>
                         <p className="text-lg font-semibold text-gray-800">
                           <span className="font-bold">Title:</span> {data.title}
                         </p>
@@ -307,7 +293,7 @@ const Workingdata = () => {
                           </button>
                           <button
                               title="Delete"
-                              onClick={() => handleDeleteClick(data.id, data.imagename)}
+                              onClick={() => handleDeleteClick(data.id)}
                               className="p-2 bg-red-100 text-red-600 rounded-full"
                           >
                             <Trash2 size={20} />
