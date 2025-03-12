@@ -162,7 +162,7 @@ const registrations = () => {
     if (selectedRow) {
         return (
             <div
-                className="p-6 bg-gray-100 overflow-hidden overflow-y-scroll"
+                className="p-6 bg-gray-100 overflow-hidden"
                 style={{ height: "calc(100vh - 80px)" }}
             >
                 <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} />
@@ -277,7 +277,7 @@ const registrations = () => {
 
     // Default table view (show only selected columns)
     return (
-        <div className="bg-gray-50 h-screen p-2 overflow-hidden" style={{ height: "calc(100vh - 80px)" }}>
+        <div className="bg-gray-50 h-screen p-2 overflow-hidden overflow-y-scroll scrollbar-custom" style={{ height: "calc(100vh - 80px)" }}>
             <div className="flex items-center justify-between ">
                 <h1 className="bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold">
                     Registration Requests

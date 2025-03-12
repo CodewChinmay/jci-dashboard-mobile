@@ -30,14 +30,24 @@ const addteam = () => {
 
   // State for custom Role dropdown
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
-  const roleOptions = ["Past President", "LGB Member"];
+  const roleOptions = ["Past President", "JCI Superheroes 2025"];
 
   // States for prefix dropdown (separate from Member Name)
   const [selectedPrefix, setSelectedPrefix] = useState("");
   const [showPrefixDropdown, setShowPrefixDropdown] = useState(false);
   const prefixOptions = ["JC", "HGF", "JFD", "JFM", "JCI Sen."];
+
+  // Modified toggle: when opening prefix dropdown, close all other dropdowns.
   const togglePrefixDropdown = () => {
-    setShowPrefixDropdown((prev) => !prev);
+    setShowPrefixDropdown((prev) => {
+      const newVal = !prev;
+      if (newVal) {
+        setShowSuggestions(false);
+        setShowDesignationSuggestions(false);
+        setShowRoleDropdown(false);
+      }
+      return newVal;
+    });
   };
 
   // Refs for click outside detection
@@ -112,6 +122,10 @@ const addteam = () => {
   const handleNameFocus = () => {
     const sortedAll = [...generalMembers].sort((a, b) => a.Name.localeCompare(b.Name));
     setFilteredGeneralMembers(sortedAll);
+    // Close other dropdowns when opening suggestions
+    setShowDesignationSuggestions(false);
+    setShowRoleDropdown(false);
+    setShowPrefixDropdown(false);
     setShowSuggestions(true);
   };
 
@@ -121,6 +135,10 @@ const addteam = () => {
         a.designation.localeCompare(b.designation)
     );
     setFilteredDesignations(sortedAll);
+    // Close other dropdowns when opening designation suggestions
+    setShowSuggestions(false);
+    setShowRoleDropdown(false);
+    setShowPrefixDropdown(false);
     setShowDesignationSuggestions(true);
   };
 
@@ -129,6 +147,10 @@ const addteam = () => {
     setShowSuggestions((prev) => {
       const newVal = !prev;
       if (newVal) {
+        // When opening, close other dropdowns
+        setShowDesignationSuggestions(false);
+        setShowRoleDropdown(false);
+        setShowPrefixDropdown(false);
         const sortedAll = [...generalMembers].sort((a, b) => a.Name.localeCompare(b.Name));
         setFilteredGeneralMembers(sortedAll);
       }
@@ -141,6 +163,10 @@ const addteam = () => {
     setShowDesignationSuggestions((prev) => {
       const newVal = !prev;
       if (newVal) {
+        // When opening, close other dropdowns
+        setShowSuggestions(false);
+        setShowRoleDropdown(false);
+        setShowPrefixDropdown(false);
         const sortedAll = [...designationList].sort((a, b) =>
             a.designation.localeCompare(b.designation)
         );
@@ -298,22 +324,22 @@ const addteam = () => {
           className="flex flex-col items-center overflow-hidden overflow-y-scroll custom-scrollbar"
           style={{ height: "calc(100vh - 140px)" }}
       >
-        <div className="w-full flex flex-col gap-4 p-4">
+        <div className="w-full max-w-4xl flex flex-col gap-4 p-4">
           {/* Form Section */}
-          <div className="p-8 mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Enter Details</h2>
+          <div className="p-6 md:p-8 mb-8 bg-white rounded-lg shadow">
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">Enter Details</h2>
             <form onSubmit={handleSubmit} className="space-y-3 relative">
-              <div className="grid grid-cols-12 gap-4">
-                {/* Prefix Dropdown: 3 columns */}
-                <div className="relative col-span-3" ref={prefixRef}>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                {/* Prefix Dropdown: Full width on mobile, 3 columns on md+ */}
+                <div className="relative col-span-12 md:col-span-3" ref={prefixRef}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Select Title
                   </label>
                   <div onClick={togglePrefixDropdown} className={commonDropdownClasses}>
                     <span>{selectedPrefix || "Select Title"}</span>
                     <span className="text-gray-600">
-                    {showPrefixDropdown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                  </span>
+                      {showPrefixDropdown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    </span>
                   </div>
                   {showPrefixDropdown && (
                       <ul className="absolute z-10 bg-white border-2 border-gray-300 w-full mt-1 max-h-60 overflow-y-auto transition-all duration-300 ease-in-out">
@@ -329,8 +355,8 @@ const addteam = () => {
                       </ul>
                   )}
                 </div>
-                {/* Member Name Input with Autocomplete: 9 columns */}
-                <div className="relative col-span-9" ref={nameDropdownRef}>
+                {/* Member Name Input with Autocomplete: Full width on mobile, 9 columns on md+ */}
+                <div className="relative col-span-12 md:col-span-9" ref={nameDropdownRef}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Member Name
                   </label>
@@ -349,8 +375,8 @@ const addteam = () => {
                         onClick={toggleSuggestions}
                         className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-600"
                     >
-                    {showSuggestions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                  </span>
+                      {showSuggestions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    </span>
                   </div>
                   {showSuggestions && filteredGeneralMembers.length > 0 && (
                       <ul className="absolute z-10 bg-white border-2 border-gray-300 w-full max-h-60 overflow-y-auto transition-all duration-300 ease-in-out">
@@ -387,8 +413,8 @@ const addteam = () => {
                       onClick={toggleDesignationSuggestions}
                       className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-600"
                   >
-                  {showDesignationSuggestions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </span>
+                    {showDesignationSuggestions ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </span>
                 </div>
                 {showDesignationSuggestions && filteredDesignations.length > 0 && (
                     <ul className="absolute z-10 bg-white border-2 border-gray-300 w-full max-h-60 overflow-y-auto transition-all duration-300 ease-in-out">
@@ -409,11 +435,24 @@ const addteam = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Select Team
                 </label>
-                <div onClick={() => setShowRoleDropdown((prev) => !prev)} className={commonDropdownClasses}>
+                <div
+                    onClick={() =>
+                        setShowRoleDropdown((prev) => {
+                          const newVal = !prev;
+                          if (newVal) {
+                            setShowDesignationSuggestions(false);
+                            setShowSuggestions(false);
+                            setShowPrefixDropdown(false);
+                          }
+                          return newVal;
+                        })
+                    }
+                    className={commonDropdownClasses}
+                >
                   <span>{formData.role || "Select Team"}</span>
                   <span className="text-gray-600">
-                  {showRoleDropdown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </span>
+                    {showRoleDropdown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </span>
                 </div>
                 {showRoleDropdown && (
                     <ul className="absolute z-10 bg-white border-2 border-gray-300 w-full mt-1 max-h-60 overflow-y-auto transition-all duration-300 ease-in-out">

@@ -103,7 +103,12 @@ const YoutubeGallery = () => {
                 { highlighted: !currentStatus }
             );
             toast.success(response.data.message);
-            fetchYoutubeUrls();
+            // Update the state locally to preserve item positions instead of re-fetching all URLs
+            setYoutubeUrls((prevUrls) =>
+                prevUrls.map((item) =>
+                    item.id === id ? { ...item, highlighted: !currentStatus } : item
+                )
+            );
         } catch (error) {
             console.error("Error toggling highlight:", error);
             toast.error("Error toggling highlight");
@@ -144,7 +149,7 @@ const YoutubeGallery = () => {
     };
 
     return (
-        <div className="container mx-auto px-4 py-4">
+        <div className="container  mx-auto px-4 py-4">
             {/* Form to add a new YouTube URL */}
             <div className="bg-white rounded-lg shadow-xl p-4 mb-6">
                 <form onSubmit={handleAddUrl}>
@@ -162,9 +167,9 @@ const YoutubeGallery = () => {
                         />
                         <button
                             type="submit"
-                            className="bg-red-500 text-white px-3 py-2 rounded-r-lg hover:bg-blue-600 transition"
+                            className="bg-cyan-500 text-white px-3 py-2 rounded-r-lg hover:bg-cyan-600 transition"
                         >
-                            +
+                            Submit
                         </button>
                     </div>
                 </form>

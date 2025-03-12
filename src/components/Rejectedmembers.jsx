@@ -180,7 +180,7 @@ const Rejectedmembers = () => {
 
     // Main table view (show only fixed columns)
     return (
-        <div className="p-2 overflow-hidden" style={{ height: "calc(100vh - 80px)" }}>
+        <div className="p-2 overflow-hidden scrollbar-custom overflow-y-scroll" style={{ height: "calc(100vh - 80px)" }}>
             <div className="flex items-center justify-between">
                 <h1 className="bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold">
                     Rejected Members

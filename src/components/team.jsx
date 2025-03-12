@@ -460,7 +460,7 @@ const Team = () => {
                       </div>
                       {showTeamRoleDropdownEditing && (
                           <ul className="absolute z-10 bg-white border-2 border-gray-300 w-full mt-1 max-h-60 overflow-y-auto transition-all duration-300 ease-in-out">
-                            {["Past President", "LGB Member"].map((role, index) => (
+                            {["Past President", "JCI Superheroes 2025"].map((role, index) => (
                                 <li
                                     key={index}
                                     onMouseDown={() => {
@@ -534,7 +534,7 @@ const Team = () => {
                 </div>
                 {showTeamFilterDropdown && (
                     <ul className="absolute z-10 bg-white border-2 border-gray-400 w-60 mt-1 max-h-60 overflow-y-auto transition-all duration-300 ease-in-out">
-                      {["All", "Past President", "LGB Member"].map((role, index) => (
+                      {["All", "Past President", "JCI Superheroes 2025"].map((role, index) => (
                           <li
                               key={index}
                               onMouseDown={() => {

@@ -1,14 +1,17 @@
 import { useState } from "react";
 import Workingareas from "./gallery.jsx";
 import Workingdata from "./video.jsx";
+import Sliding from "./carousel.jsx"
 
 function GalleryTab() {
     // Set default active content to a valid title, e.g., "Images"
-    const [activeContent, setActiveContent] = useState("Images");
+    const [activeContent, setActiveContent] = useState("Sliding Images");
 
     const content = [
-        { title: "Images", content: <Workingareas /> },
-        { title: "Vidoes", content: <Workingdata /> },
+        { title: "Sliding Images", content: <Sliding />},
+        { title: "Image Gallery ", content: <Workingareas /> },
+        { title: "Video Gallery", content: <Workingdata /> },
+
     ];
 
     function getContent(title) {
@@ -24,7 +27,7 @@ function GalleryTab() {
                         key={index}
                         onClick={() => setActiveContent(item.title)}
                         className={`
-              flex items-center gap-2 px-10 py-2 text-sm font-medium text-center whitespace-nowrap 
+              flex items-center gap-2 px-4 py-2 text-sm font-medium text-center whitespace-nowrap 
               ${activeContent === item.title
                             ? "bg-white text-gray-600 border-t-2 border-cyan-600 rounded-t-xl font-semibold text-4xl"
                             : "text-gray-600 hover:bg-gray-200 hover:text-gray-800"

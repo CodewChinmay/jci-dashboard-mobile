@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
 
-import logo from "../assets/jciamravati.png"
+import logo from "../assets/jci.png"
 import bizologo from "../assets/bizonancelogo.png"
 
 const Login = () => {
@@ -14,7 +14,7 @@ const Login = () => {
 
   const handleLogin = (e) => {
     e.preventDefault()
-    if (userId === "jci123" && password === "123") {
+    if (userId === "jciamravati1959" && password === "jciamt@1959") {
       navigate("/main") // Navigate to MainApp
     } else {
       setError("Invalid User ID or Password")
@@ -34,12 +34,12 @@ const Login = () => {
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
             <div className="mb-3">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="userId">
-                User ID
+                Username
               </label>
               <input
                   id="userId"
                   type="text"
-                  placeholder="Enter User ID"
+                  placeholder="Enter Username"
                   value={userId}
                   onChange={(e) => setUserId(e.target.value)}
                   className="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -58,17 +58,6 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <button
-                    type="button"
-                    onClick={toggleShowPassword}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                >
-                  {showPassword ? (
-                      <EyeOffIcon className="h-5 w-5 text-gray-500" />
-                  ) : (
-                      <EyeIcon className="h-5 w-5 text-gray-500" />
-                  )}
-                </button>
               </div>
             </div>
             <button

@@ -3,7 +3,7 @@ import "../App.css";
 
 const siteframe = () => {
     const [isLoading, setIsLoading] = useState(true);
-    const url = "https://jciamravati.in/";
+    const url = "https://jciamravati.in";
 
     // Inline style objects
     const containerStyle = { position: "relative" };

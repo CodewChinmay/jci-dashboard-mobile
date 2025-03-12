@@ -7,7 +7,7 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-      <div>
+      <div className="overflow-hidden">
         <Navbar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}  />
         <Menu isOpen={isSidebarOpen} />
       </div>

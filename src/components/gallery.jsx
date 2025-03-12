@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { PlusCircle, Trash2, X, Star } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
@@ -54,7 +54,10 @@ const Gallery = () => {
   const [confirmModal, setConfirmModal] = useState(null);
   const [showValidationModal, setShowValidationModal] = useState(false);
 
-  // Fetch images from the server
+  // Create a ref for the file input element
+  const fileInputRef = useRef(null);
+
+  // Fetch images from the server and sort them by id
   const fetchImages = async () => {
     try {
       const response = await axios.get("https://jciamravati.in/api/v1/gallery/images");
@@ -62,29 +65,27 @@ const Gallery = () => {
       const baseUrl =
           "https://media.bizonance.in/api/v1/image/download/eca82cda-d4d7-4fe5-915a-b0880bb8de74/jci-amravati";
 
-      // Check for preferred format first (response.data.images)
+      let mappedImages = [];
       if (response.data.images && Array.isArray(response.data.images)) {
-        const mappedImages = response.data.images.map((img) => ({
+        mappedImages = response.data.images.map((img) => ({
           url: `${baseUrl}/${img.name}?q=50%&&f=webp`,
           id: img.id,
           name: img.name,
           highlighted: img.highlighted,
         }));
-        setImages(mappedImages);
-      }
-      // Otherwise, check for alternative format (imageNames array)
-      else if (response.data.imageNames && Array.isArray(response.data.imageNames)) {
-        const mappedImages = response.data.imageNames.map((name, index) => ({
+      } else if (response.data.imageNames && Array.isArray(response.data.imageNames)) {
+        mappedImages = response.data.imageNames.map((name, index) => ({
           url: `${baseUrl}/${name}?q=50%&&f=webp`,
           id: index, // fallback id
           name: name,
-          highlighted: false, // default to false since no info provided
+          highlighted: false,
         }));
-        setImages(mappedImages);
       } else {
         console.error("Invalid response format:", response.data);
-        setImages([]);
       }
+      // Sort the images by id so that the order remains consistent
+      mappedImages.sort((a, b) => (a.id > b.id ? 1 : -1));
+      setImages(mappedImages);
     } catch (error) {
       console.error("Error fetching gallery images:", error.message);
       setImages([]);
@@ -119,7 +120,11 @@ const Gallery = () => {
           { highlighted: newHighlighted }
       );
       toast.success(response.data.message);
-      fetchImages();
+      setImages((prevImages) =>
+          prevImages.map((img) =>
+              img.id === image.id ? { ...img, highlighted: newHighlighted } : img
+          )
+      );
     } catch (error) {
       console.error("Error updating highlight status:", error);
       toast.error("Failed to update highlight status.");
@@ -130,10 +135,7 @@ const Gallery = () => {
   const handleImageChange = (e) => {
     const files = e.target.files;
     const imagesArray = Array.from(files);
-    if (imagesArray.length > 5) {
-      setShowValidationModal(true);
-      return;
-    }
+    // All selected images appear in preview
     setSelectedImages(imagesArray);
     setPreviewImages(imagesArray.map((file) => URL.createObjectURL(file)));
   };
@@ -147,6 +149,7 @@ const Gallery = () => {
   // Handle image upload submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Enforce a maximum of 5 images per submission
     if (selectedImages.length > 5) {
       setShowValidationModal(true);
       return;
@@ -173,8 +176,13 @@ const Gallery = () => {
             { headers: { "Content-Type": "application/json" } }
         );
       }
+      // Reset selected images and preview images on successful submit
       setSelectedImages([]);
       setPreviewImages([]);
+      // Clear the file input using the ref
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       fetchImages();
     } catch (error) {
       console.error("Error uploading images:", error.response?.data || error.message);
@@ -211,82 +219,57 @@ const Gallery = () => {
   }, []);
 
   return (
-      <div className="p-4 overflow-hidden overflow-y-scroll" style={{ height: "calc(100vh - 80px)" }}>
-        <h1 className="text-3xl font-bold text-gray-700 mb-6 text-center">Gallery Images</h1>
+      <div
+          id="gallery-parent"
+          className="p-4 overflow-hidden overflow-y-scroll scrollbar-custom"
+          style={{ height: "calc(100vh - 140px)"}}
+      >
+        <h1 className="text-3xl font-bold text-gray-700 mb-6 text-center">
+          Gallery Images
+        </h1>
         <p className="text-sm text-gray-500 text-center mb-4">
           Note: Only 5 images can be submitted per submit.
         </p>
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Input Section */}
-          <div className="flex-1">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="flex flex-col items-center">
-                <label
-                    htmlFor="imageUpload"
-                    className="w-[400px] h-[240px] flex items-center justify-center bg-gray-100 border-2 border-dashed border-blue-400 cursor-pointer hover:bg-gray-50 transition relative"
-                >
-                  {previewImages.length === 0 && (
-                      <PlusCircle className="w-12 h-12 text-blue-400" />
-                  )}
-                </label>
-                <input
-                    type="file"
-                    id="imageUpload"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    multiple
-                    className="hidden"
-                />
-                <p className="text-sm text-gray-500 mt-3 text-center">
-                  {selectedImages.length > 0
-                      ? `${selectedImages.length} image(s) selected`
-                      : "Click the icon to choose images"}
-                </p>
-                <h3
-                    onClick={() => {
-                      setSelectedImages([]);
-                      setPreviewImages([]);
-                    }}
-                    className="underline text-sm text-gray-500 hover:text-cyan-500 cursor-pointer"
-                >
-                  Clear Image
-                </h3>
-              </div>
-              <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full h-10 py-3 rounded-lg text-white font-semibold transition bg-blue-500 hover:bg-blue-600 shadow-md"
-              >
-                {isSubmitting ? "Uploading..." : "Submit"}
-              </button>
-            </form>
-          </div>
-          {/* Preview Section */}
+        {/* Input & Preview Section */}
+        <form onSubmit={handleSubmit} className="mb-4 w-full">
+          <input
+              type="file"
+              id="imageUpload"
+              accept="image/*"
+              multiple
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              className="w-full border border-gray-300 p-2 rounded mb-2"
+          />
           {previewImages.length > 0 && (
-              <div className="flex-1">
-                <h2 className="text-xl font-semibold text-gray-700 mb-2">Selected Previews</h2>
-                <div className="grid grid-cols-3 gap-2">
-                  {previewImages.map((image, index) => (
-                      <div key={index} className="relative">
-                        <img
-                            src={image}
-                            alt={`Preview ${index}`}
-                            className="w-full h-32 object-cover rounded-lg border-2 border-gray-300 cursor-pointer"
-                            onClick={() => handleOpenLightbox(image)}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => removePreview(index)}
-                            className="absolute top-1 right-1 bg-gray-200 rounded-full p-1 hover:bg-gray-400"
-                        >
-                          <X className="w-4 h-4 text-gray-700" />
-                        </button>
-                      </div>
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {previewImages.map((image, index) => (
+                    <div key={index} className="relative">
+                      <img
+                          src={image}
+                          alt={`Preview ${index}`}
+                          className="w-20 h-20 object-cover rounded border border-gray-300 cursor-pointer"
+                          onClick={() => handleOpenLightbox(image)}
+                      />
+                      <button
+                          type="button"
+                          onClick={() => removePreview(index)}
+                          className="absolute top-0 right-0 bg-gray-200 rounded-full p-1 hover:bg-gray-400"
+                      >
+                        <X className="w-4 h-4 text-gray-700" />
+                      </button>
+                    </div>
+                ))}
               </div>
           )}
-        </div>
+          <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full px-4 py-2 bg-cyan-500 text-white rounded"
+          >
+            {isSubmitting ? "Uploading..." : "Submit"}
+          </button>
+        </form>
         {/* Gallery Section */}
         <div className="mt-10">
           <div className="grid grid-cols-3 gap-6">
@@ -311,9 +294,11 @@ const Gallery = () => {
                                 image.highlighted ? "bg-yellow-500" : "bg-white"
                             }`}
                         >
-                          <Star className={`w-5 h-5 ${
-                              image.highlighted ? "text-white" : "text-gray-800"
-                          }`} />
+                          <Star
+                              className={`w-5 h-5 ${
+                                  image.highlighted ? "text-white" : "text-gray-800"
+                              }`}
+                          />
                         </button>
                         {/* Delete button */}
                         <button
@@ -355,7 +340,7 @@ const Gallery = () => {
         {/* Validation Modal */}
         {showValidationModal && (
             <AlertModal
-                message="Only 5 images can be submitted per submit."
+                message="Only 5 images can be submitted per submit. Please remove the extra images."
                 onClose={() => setShowValidationModal(false)}
             />
         )}

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { PlusCircle, Trash2, X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../App.css";
@@ -11,16 +11,10 @@ const ConfirmModal = ({ message, onConfirm, onCancel }) => (
       <div className="bg-white p-6 rounded-lg shadow-lg">
         <p className="mb-4 text-gray-800">{message}</p>
         <div className="flex justify-end gap-4">
-          <button
-              onClick={onCancel}
-              className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-          >
+          <button onClick={onCancel} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
             Cancel
           </button>
-          <button
-              onClick={onConfirm}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-          >
+          <button onClick={onConfirm} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
             Confirm
           </button>
         </div>
@@ -34,10 +28,7 @@ const AlertModal = ({ message, onClose }) => (
       <div className="bg-white p-6 rounded-lg shadow-lg">
         <p className="mb-4 text-gray-800">{message}</p>
         <div className="flex justify-end">
-          <button
-              onClick={onClose}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
+          <button onClick={onClose} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
             OK
           </button>
         </div>
@@ -53,6 +44,9 @@ const Carousel = () => {
   const [lightboxImage, setLightboxImage] = useState(null);
   const [confirmModal, setConfirmModal] = useState(null);
   const [showValidationModal, setShowValidationModal] = useState(false);
+
+  // Create a ref for the file input element
+  const fileInputRef = useRef(null);
 
   // Fetch images from server
   const fetchImages = async () => {
@@ -75,7 +69,6 @@ const Carousel = () => {
     } catch (error) {
       console.error("Error fetching carousel images:", error.message);
       setImages([]);
-      // toast.error("Error fetching carousel images.");
     }
   };
 
@@ -143,8 +136,13 @@ const Carousel = () => {
             { headers: { "Content-Type": "application/json" } }
         );
       }
+      // Reset selected images and preview images on successful submit
       setSelectedImages([]);
       setPreviewImages([]);
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       fetchImages();
     } catch (error) {
       console.error("Error uploading images:", error.response?.data || error.message);
@@ -181,91 +179,56 @@ const Carousel = () => {
   }, []);
 
   return (
-      <div className="p-4 overflow-hidden overflow-y-scroll" style={{ height: "calc(100vh - 80px)" }}>
-        <h1 className="text-3xl font-bold text-gray-700 mb-6 text-center">
-          Sliding Images
-        </h1>
-
-        {/* Note for maximum allowed images */}
+      <div className="p-4 overflow-hidden overflow-y-scroll" style={{ height: "calc(100vh - 140px)" }}>
+        <h1 className="text-3xl font-bold text-gray-700 mb-6 text-center">Sliding Images</h1>
         <p className="text-sm text-gray-500 text-center mb-4">
           Note: Only 5 images can be submitted per submit.
         </p>
 
-        {/* Flex container: Input Section on the left and Preview Section on the right */}
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Input Section */}
-          <div className="flex-1">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="flex flex-col items-center">
-                <label
-                    htmlFor="imageUpload"
-                    className="w-[400px] h-[240px] flex items-center justify-center bg-gray-100 border-2 border-dashed border-blue-400 cursor-pointer hover:bg-gray-50 transition relative"
-                >
-                  {previewImages.length === 0 && (
-                      <PlusCircle className="w-12 h-12 text-blue-400" />
-                  )}
-                </label>
-                <input
-                    type="file"
-                    id="imageUpload"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    multiple
-                    className="hidden"
-                />
-                <p className="text-sm text-gray-500 mt-3 text-center">
-                  {selectedImages.length > 0
-                      ? `${selectedImages.length} image(s) selected`
-                      : "Click the icon to choose images"}
-                </p>
-                <h3
-                    onClick={() => {
-                      setSelectedImages([]);
-                      setPreviewImages([]);
-                    }}
-                    className="underline text-sm text-gray-500 hover:text-cyan-500 cursor-pointer"
-                >
-                  Clear Image
-                </h3>
-
-                {/* Submit Button (full width) */}
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full h-10 py-3 rounded-lg text-white font-semibold transition bg-blue-500 hover:bg-blue-600 shadow-md mt-4"
-                >
-                  {isSubmitting ? "Uploading..." : "Submit"}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* Preview Section: Visible only when images are selected */}
+        {/* Input Section */}
+        <form onSubmit={handleSubmit} className="mb-4 w-full">
+          <input
+              type="file"
+              id="imageUpload"
+              accept="image/*"
+              multiple
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              className="w-full border border-gray-300 p-2 rounded mb-2"
+          />
+          {/* Display number of selected images */}
+          {selectedImages.length > 0 && (
+              <p className="mb-2 text-gray-600">Selected images: {selectedImages.length}</p>
+          )}
           {previewImages.length > 0 && (
-              <div className="flex-1">
-                <h2 className="text-xl font-semibold text-gray-700 mb-2">Selected Previews</h2>
-                <div className="grid grid-cols-3 gap-2">
-                  {previewImages.map((image, index) => (
-                      <div key={index} className="relative">
-                        <img
-                            src={image}
-                            alt={`Preview ${index}`}
-                            className="w-full h-32 object-cover rounded-lg border-2 border-gray-300 cursor-pointer"
-                            onClick={() => handleOpenLightbox(image)}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => removePreview(index)}
-                            className="absolute top-1 right-1 bg-gray-200 rounded-full p-1 hover:bg-gray-400"
-                        >
-                          <X className="w-4 h-4 text-gray-700" />
-                        </button>
-                      </div>
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {previewImages.map((image, index) => (
+                    <div key={index} className="relative">
+                      <img
+                          src={image}
+                          alt={`Preview ${index}`}
+                          className="w-20 h-20 object-cover rounded border border-gray-300 cursor-pointer"
+                          onClick={() => handleOpenLightbox(image)}
+                      />
+                      <button
+                          type="button"
+                          onClick={() => removePreview(index)}
+                          className="absolute top-0 right-0 bg-gray-200 rounded-full p-1 hover:bg-gray-400"
+                      >
+                        <X className="w-4 h-4 text-gray-700" />
+                      </button>
+                    </div>
+                ))}
               </div>
           )}
-        </div>
+          <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full px-4 py-2 bg-cyan-500 text-white rounded"
+          >
+            {isSubmitting ? "Uploading..." : "Submit"}
+          </button>
+        </form>
 
         {/* Gallery Section */}
         <div className="mt-10">
